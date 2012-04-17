@@ -7,12 +7,28 @@ import java.util.List;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Handler;
 import android.text.format.DateUtils;
 import android.util.Pair;
 
 public class CalendarHelper {
+	public static void observeCalendar(Context context) {
+		ContentResolver contentResolver = context.getContentResolver();
+		Handler handler = new Handler();
+		ContentObserver observer = new ContentObserver(handler) {
+			@Override
+			public void onChange(boolean selfChange) {
+				super.onChange(selfChange);
+			}
+		};
+		
+		contentResolver.registerContentObserver(Uri.parse("content://com.android.calendar/calendars"), true, observer);
+	}
+	
+	
 	public static void getCalendars(Context context) {
 		ContentResolver contentResolver = context.getContentResolver();
 	
