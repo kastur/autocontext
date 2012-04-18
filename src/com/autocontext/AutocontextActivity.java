@@ -16,6 +16,8 @@ import android.content.pm.LabeledIntent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Layout;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -32,6 +34,7 @@ public class AutocontextActivity extends Activity {
     GUI.SubmitView submitView;
 
     Flow flow;
+    LinkedList<LinearLayout> elemLayouts = new LinkedList<LinearLayout>();
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +57,7 @@ public class AutocontextActivity extends Activity {
         flowLayout.setOrientation(LinearLayout.VERTICAL);
         layout.addView(flowLayout);
         
-        drawFlow();
+        drawFlow(context);
         
         LinearLayout spinnerLayout = new LinearLayout(context);
         spinnerLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -71,10 +74,10 @@ public class AutocontextActivity extends Activity {
 				String selectedItem = spinner.getSelectedItem().toString();
 				if (selectedItem.equals("Notification")) {
 					flow.add(new GUI.NotifyFlow(context));
-					drawFlow();
+					drawFlow(context);
 				} else if (selectedItem.equals("Launch app")) {
 					flow.add(new GUI.LaunchPackageFlow(context, activity));
-					drawFlow();
+					drawFlow(context);
 				}
 			}
 		});
@@ -87,10 +90,29 @@ public class AutocontextActivity extends Activity {
         setContentView(layout);
     }
     
-    private void drawFlow() {
+    private void drawFlow(final Context context) {
+    	
     	flowLayout.removeAllViews();
-    	for (IFlow flowView : flow) {
-    		flowLayout.addView(flowView.getView());
+    	for (LinearLayout elemLayout : elemLayouts) {
+    		elemLayout.removeAllViews();
+    	}
+    	for (final IFlow flowView : flow) {
+    		LinearLayout elemLayout = new LinearLayout(context);
+    		
+    		elemLayout.addView(flowView.getView());
+    		elemLayouts.add(elemLayout);
+    		
+    		Button removeFlowButton = new Button(context);
+    		removeFlowButton.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					flow.remove(flowView);
+					drawFlow(context);
+				}
+			});
+    		removeFlowButton.setText("X");
+    		removeFlowButton.setGravity(Gravity.RIGHT);
+    		elemLayout.addView(removeFlowButton);
+    		flowLayout.addView(elemLayout);
     	}
     }
 }
