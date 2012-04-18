@@ -24,8 +24,9 @@ public class CalendarHelper {
 				super.onChange(selfChange);
 			}
 		};
-		
-		contentResolver.registerContentObserver(Uri.parse("content://com.android.calendar/calendars"), true, observer);
+	
+    Uri calendarUri = Uri.parse("content://com.android.calendar/calendars");
+		contentResolver.registerContentObserver(calendarUri, true, observer);
 	}
 	
 	
@@ -40,27 +41,38 @@ public class CalendarHelper {
 			final String _id = cursor.getString(0);
 			final String displayName = cursor.getString(1);
 			final Boolean selected = !cursor.getString(2).equals("0");
-			System.out.println("Id: " + _id + " Display Name: " + displayName + " Selected: " + selected);
+			System.out.println(
+        "Id: " + _id + 
+        " Display Name: " + displayName + 
+        " Selected: " + selected);
 		}
 	}
 	
 	public static void getEvents(Context context, int calendarId) {
-		Uri.Builder builder = Uri.parse("content://com.android.calendar/instances/when").buildUpon();
+		Uri.Builder builder = 
+        Uri.parse("content://com.android.calendar/instances/when").buildUpon();
 		long now = new Date().getTime();
 		ContentUris.appendId(builder, now - DateUtils.WEEK_IN_MILLIS);
 		ContentUris.appendId(builder, now + DateUtils.WEEK_IN_MILLIS);
 		
 		ContentResolver contentResolver = context.getContentResolver();
-		Cursor eventCursor = contentResolver.query(builder.build(),
-				new String[] { "title", "begin", "end", "allDay"}, "Calendars._id=" + calendarId,
-				null, "startDay ASC, startMinute ASC");
+		Cursor eventCursor = contentResolver.query(
+        builder.build(),
+				new String[] { "title", "begin", "end", "allDay"},
+        "Calendars._id=" + calendarId,
+				null,
+        "startDay ASC, startMinute ASC");
 
 		while (eventCursor.moveToNext()) {
 			final String title = eventCursor.getString(0);
 			final Date begin = new Date(eventCursor.getLong(1));
 			final Date end = new Date(eventCursor.getLong(2));
 			final Boolean allDay = !eventCursor.getString(3).equals("0");
-			System.out.println("Title: " + title + " Begin: " + begin + " End: " + end + " All Day: " + allDay);
+			System.out.println(
+          "Title: " + title +
+          " Begin: " + begin + 
+          " End: " + end + 
+          " All Day: " + allDay);
 		}
 	}
 	
@@ -75,17 +87,22 @@ public class CalendarHelper {
 		}
 	}
 	
-	public static List<CalendarEvent> getEventsList(Context context, int calendarId, CharSequence filterText) {
+	public static List<CalendarEvent> getEventsList(
+      Context context, int calendarId, CharSequence filterText) {
 		ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent>();
-		Uri.Builder builder = Uri.parse("content://com.android.calendar/instances/when").buildUpon();
+		Uri.Builder builder = 
+        Uri.parse("content://com.android.calendar/instances/when").buildUpon();
 		long now = new Date().getTime();
 		ContentUris.appendId(builder, now - DateUtils.WEEK_IN_MILLIS);
 		ContentUris.appendId(builder, now + DateUtils.WEEK_IN_MILLIS);
 		
 		ContentResolver contentResolver = context.getContentResolver();
-		Cursor eventCursor = contentResolver.query(builder.build(),
-				new String[] { "event_id", "title", "begin", "end", "allDay"}, "Calendars._id=" + calendarId,
-				null, "startDay ASC, startMinute ASC");
+		Cursor eventCursor = contentResolver.query(
+        builder.build(),
+				new String[] { "event_id", "title", "begin", "end", "allDay"},
+        "Calendars._id=" + calendarId,
+				null,
+        "startDay ASC, startMinute ASC");
 
 		while (eventCursor.moveToNext()) {
 			final Integer id = eventCursor.getInt(0);
