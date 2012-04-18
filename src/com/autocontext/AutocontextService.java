@@ -1,17 +1,23 @@
 package com.autocontext;
 
+import java.util.Date;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.TimeZone;
+import java.util.UUID;
 
-import com.autocontext.Autocontext.Flow;
+import com.autocontext.Autocontext.FlowMap;
 import com.autocontext.Autocontext.FlowType;
 import com.autocontext.Autocontext.IFlow;
 import com.autocontext.CalendarHelper.CalendarEvent;
+import com.autocontext.GUI.BrightnessFlow;
 import com.autocontext.GUI.CalendarEventFilterFlow;
+import com.autocontext.GUI.CalendarEventFlow;
 import com.autocontext.GUI.IdentifierFlow;
 import com.autocontext.GUI.LaunchPackageFlow;
+import com.autocontext.GUI.NotifyFlow;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -39,7 +45,7 @@ public class AutocontextService extends Service {
 	private final OneShotNotification mNotificationClicked = new OneShotNotification();
 	private PriorityQueue<CalendarEvent> calendarQueue;
 	private HashMap<CalendarEvent, String> calendarFlows;
-	HashMap<String, Flow> registeredFlows;
+	HashMap<String, FlowMap> registeredFlows;
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -51,7 +57,7 @@ public class AutocontextService extends Service {
 		super.onCreate();
 		calendarQueue = new PriorityQueue<CalendarEvent>();
 		calendarFlows = new HashMap<CalendarEvent, String>();
-		registeredFlows = new HashMap<String, Autocontext.Flow>();
+		registeredFlows = new HashMap<String, Autocontext.FlowMap>();
 		registerReceiver(mAlarm, new IntentFilter("ALARM"));
 		registerReceiver(mNotificationClicked, new IntentFilter("NOTIFICATION_CLICKED"));
 	}
@@ -74,25 +80,24 @@ public class AutocontextService extends Service {
         am.set(AlarmManager.RTC_WAKEUP, upcomingEventTime, sender);
 	}
 	
-	public String submitFlow(Flow flowList) {
+	public String submitFlow(FlowMap flowMap) {
 		String flow_id = null;
-		for (IFlow iflow : flowList) {
-			if (iflow.getType() == FlowType.IDENTIFIER) {
-				IdentifierFlow flow = (IdentifierFlow)iflow; 
-				flow_id = flow.getIdString();
-				registeredFlows.put(flow.getIdString(), flowList);
-			}
+		
+		if (flowMap.containsKey(FlowType.IDENTIFIER)) {
+			IdentifierFlow flow = (IdentifierFlow)flowMap.get(FlowType.IDENTIFIER); 
+			flow_id = flow.getIdString();
+			registeredFlows.put(flow.getIdString(), flowMap);
+		}
+	
+		if (flowMap.containsKey(FlowType.CONTEXT_CALENDAR_EVENT_FILTER)) {
+			CalendarEventFilterFlow flow =
+					(CalendarEventFilterFlow)flowMap.get(FlowType.CONTEXT_CALENDAR_EVENT_FILTER);
+			List<CalendarEvent> matching_events = 
+					CalendarHelper.getEventsList(getApplicationContext(), 1, flow.getFilterText());
+			CalendarEvent next_event = matching_events.iterator().next();
+			addCalendarAction(next_event, flow_id);
 		}
 		
-		for (IFlow iflow : flowList) {
-			if (iflow.getType() == FlowType.CONTEXT_CALENDAR_EVENT_FILTER) {
-				CalendarEventFilterFlow flow = (CalendarEventFilterFlow)iflow;
-				List<CalendarEvent> matching_events = 
-						CalendarHelper.getEventsList(getApplicationContext(), 1, flow.getFilterText());
-				CalendarEvent next_event = matching_events.iterator().next();
-				addCalendarAction(next_event, flow_id);
-			}
-		}
 		return "OK";
 	}
 	
@@ -103,48 +108,85 @@ public class AutocontextService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			CalendarEvent head_event = calendarQueue.poll();
-			PackageManager packageManager = (PackageManager)getPackageManager();
 			String flow_id = calendarFlows.get(head_event);
 			
-			Flow flowList = registeredFlows.get(flow_id);
-			
-			for (IFlow iflow : flowList) {
-				if (iflow.getType() == FlowType.ACTION_NOTIFY) {
-					Intent newIntent = new Intent("NOTIFICATION_CLICKED");
-					newIntent.putExtra("flow_id", flow_id);
-					PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, newIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-					
-					NotificationHelper.QueueNotification(getApplicationContext(), head_event.id, head_event.begin, head_event.title, head_event.title, "", pendingIntent);
-					break;
-				}
-				if (iflow.getType() == FlowType.ACTION_LAUNCH_PACKAGE) {
-					LaunchPackageFlow flow = (LaunchPackageFlow)iflow;
-					Intent launchIntent = packageManager.getLaunchIntentForPackage(flow.getSelectedPackage());
-					launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-					startActivity(launchIntent);
-				}
-			}
-			
 			System.out.println("HAPPENING: " + head_event.id + " " + head_event.title + " " + head_event.begin.toString());
+			
+			// Create a new flow for this particular calendar event.
+			FlowMap flowList = (FlowMap)registeredFlows.get(flow_id).clone();
+			CalendarEventFlow calendarEventFlow = new CalendarEventFlow(getApplicationContext());
+			calendarEventFlow.setEvent(head_event);
+			flowList.put(FlowType.CONTEXT_CALENDAR_EVENT, calendarEventFlow);
+			String new_flow_id = UUID.randomUUID().toString();
+			registeredFlows.put(new_flow_id, flowList);
+			
+			performActions(new_flow_id);
 		}
+	}
+	
+	private void performActions(String flow_id) {
+		PackageManager packageManager = (PackageManager)getPackageManager();
+		FlowMap flowMap = registeredFlows.get(flow_id);
+		if (flowMap.containsKey(FlowType.ACTION_NOTIFY)) {
+			// Only show notification if not already shown.
+			if (!((IdentifierFlow)flowMap.get(FlowType.IDENTIFIER)).actionNotificationShown()) {
+				Intent newIntent = new Intent("NOTIFICATION_CLICKED");
+				newIntent.putExtra("flow_id", flow_id);
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(
+						getApplicationContext(), 0, newIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+				
+				
+				String notification_ticker;
+				String notification_contentTitle;
+				String notification_contentText;
+				Date notification_date;
+				if(flowMap.containsKey(FlowType.CONTEXT_CALENDAR_EVENT)) {
+					CalendarEventFlow calendarEventFlow =
+							(CalendarEventFlow)flowMap.get(FlowType.CONTEXT_CALENDAR_EVENT);
+					CalendarEvent calendarEvent = calendarEventFlow.getEvent();
+					notification_ticker = "[AUTO]: " + calendarEvent.title;
+					notification_contentTitle = calendarEvent.title;
+					notification_contentText = "Autocontext calender event filter match.";
+					notification_date = calendarEvent.begin;
+				} else {
+					notification_ticker = "[AUTO EVENT]";
+					notification_contentTitle = "[AUTO EVENT]";
+					notification_contentText = "";
+					notification_date = new Date(System.currentTimeMillis());
+				}
+				
+				int notification_id = flow_id.hashCode();
+				
+				NotificationHelper.QueueNotification(
+						getApplicationContext(), notification_id, notification_date,
+						notification_ticker, notification_contentTitle, notification_contentText,
+						pendingIntent);
+				
+				((IdentifierFlow)flowMap.get(FlowType.IDENTIFIER)).setActionNotificationShown();
+				return;
+			}
+		}
+		
+		if (flowMap.containsKey(FlowType.ACTION_LAUNCH_PACKAGE)) {
+			LaunchPackageFlow flow = (LaunchPackageFlow)flowMap.get(FlowType.ACTION_LAUNCH_PACKAGE);
+			Intent launchIntent = packageManager.getLaunchIntentForPackage(flow.getSelectedPackage());
+			launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+			startActivity(launchIntent);
+		}
+		
+		if (flowMap.containsKey(FlowType.ACTION_BRIGHTNESS_VALUE)) {
+			BrightnessFlow flow = (BrightnessFlow)flowMap.get(FlowType.ACTION_BRIGHTNESS_VALUE);
+			flow.run();
+		}
+		
+		
 	}
 	
 	public class OneShotNotification extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String flow_id = intent.getStringExtra("flow_id");
-			Flow flowList = registeredFlows.get(flow_id);
-			
-			for (IFlow iflow : flowList) {
-				if (iflow.getType() == FlowType.ACTION_LAUNCH_PACKAGE) {
-					LaunchPackageFlow flow = (LaunchPackageFlow)iflow;
-					PackageManager packageManager = (PackageManager)getPackageManager();
-					Intent launchIntent = packageManager.getLaunchIntentForPackage(flow.getSelectedPackage());
-					launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-					startActivity(launchIntent);
-				}
-			}
+			performActions(flow_id);
 		}
-		
 	}
 }

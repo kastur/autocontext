@@ -3,7 +3,8 @@ package com.autocontext;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.autocontext.Autocontext.Flow;
+import com.autocontext.Autocontext.FlowMap;
+import com.autocontext.Autocontext.FlowType;
 import com.autocontext.Autocontext.IFlow;
 
 import android.app.Activity;
@@ -24,17 +25,20 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 
 public class AutocontextActivity extends Activity {
 	LinearLayout layout;
-	LinearLayout flowLayout;
+	
 
     Internal.AutocontextServiceConnection serviceConn;
     GUI.IdentifierFlow identifierFlow;
     GUI.SubmitView submitView;
 
-    Flow flow;
-    LinkedList<LinearLayout> elemLayouts = new LinkedList<LinearLayout>();
+    FlowMap flow;
+    TableLayout flowLayout;
+    LinkedList<TableRow> elemLayouts = new LinkedList<TableRow>();
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,15 +49,16 @@ public class AutocontextActivity extends Activity {
         serviceConn = new Internal.AutocontextServiceConnection(context);
         identifierFlow = new GUI.IdentifierFlow(context);
         
-        flow = new Flow();
-        flow.add(identifierFlow);
+        flow = new FlowMap();
+        flow.put(FlowType.IDENTIFIER, identifierFlow);
         
-        flow.add(new GUI.CalendarEventFilterFlow(context));
+        flow.put(FlowType.CONTEXT_CALENDAR_EVENT_FILTER, new GUI.CalendarEventFilterFlow(context));
+        flow.put(FlowType.ACTION_BRIGHTNESS_VALUE, new GUI.BrightnessFlow(context));
 
         layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
         
-        flowLayout = new LinearLayout(context);
+        flowLayout = new TableLayout(context);
         flowLayout.setOrientation(LinearLayout.VERTICAL);
         layout.addView(flowLayout);
         
@@ -62,7 +67,7 @@ public class AutocontextActivity extends Activity {
         LinearLayout spinnerLayout = new LinearLayout(context);
         spinnerLayout.setOrientation(LinearLayout.HORIZONTAL);
         final Spinner spinner = new Spinner(this);
-        String[] items = {"Notification", "Launch app"};
+        String[] items = {"Provide Notification", "Launch App", "Set Display Brightness"};
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
         spinner.setAdapter(spinnerArrayAdapter);
         spinnerLayout.addView(spinner);
@@ -73,12 +78,13 @@ public class AutocontextActivity extends Activity {
 			public void onClick(View v) {
 				String selectedItem = spinner.getSelectedItem().toString();
 				if (selectedItem.equals("Notification")) {
-					flow.add(new GUI.NotifyFlow(context));
-					drawFlow(context);
+					flow.put(FlowType.ACTION_NOTIFY, new GUI.NotifyFlow(context));
 				} else if (selectedItem.equals("Launch app")) {
-					flow.add(new GUI.LaunchPackageFlow(context, activity));
-					drawFlow(context);
+					flow.put(FlowType.ACTION_LAUNCH_PACKAGE, new GUI.LaunchPackageFlow(context, activity));
+				} else if (selectedItem.equals("Set Display Brightness")) {
+					flow.put(FlowType.ACTION_BRIGHTNESS_VALUE, new GUI.BrightnessFlow(context));
 				}
+				drawFlow(context);
 			}
 		});
         spinnerLayout.addView(addFlowButton);
@@ -91,13 +97,15 @@ public class AutocontextActivity extends Activity {
     }
     
     private void drawFlow(final Context context) {
-    	
-    	flowLayout.removeAllViews();
-    	for (LinearLayout elemLayout : elemLayouts) {
+    	// Clear the TableLayout and each of the rows.
+    	for (TableRow elemLayout : elemLayouts) {
     		elemLayout.removeAllViews();
     	}
-    	for (final IFlow flowView : flow) {
-    		LinearLayout elemLayout = new LinearLayout(context);
+    	flowLayout.removeAllViews();
+    	
+    	// Add one row per flow.
+    	for (final IFlow flowView : flow.values()) {
+    		TableRow elemLayout = new TableRow(context);
     		
     		elemLayout.addView(flowView.getView());
     		elemLayouts.add(elemLayout);

@@ -1,25 +1,35 @@
 package com.autocontext;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.autocontext.Autocontext.Flow;
+import com.autocontext.Autocontext.FlowMap;
 import com.autocontext.Autocontext.FlowType;
 import com.autocontext.Autocontext.IFlow;
+import com.autocontext.CalendarHelper.CalendarEvent;
 import com.autocontext.Internal.AutocontextServiceConnection;
+import com.geekyouup.android.autobright.AutoBright;
 
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.app.PendingIntent.CanceledException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -29,14 +39,19 @@ public class GUI {
 	public static class IdentifierFlow implements IFlow {
 		Context mContext;
 		LinearLayout layout;
-		TextView idText;
+		
+		String mFlowIdString;
+		
+		Boolean mNotificationShown;
 
 		IdentifierFlow(Context context) {
 			mContext = context;
-			createView();
+			mFlowIdString = UUID.randomUUID().toString();
+			mNotificationShown = false;
 		}
 
 		public View getView() {
+			createView();
 			return layout;
 		}
 
@@ -45,17 +60,32 @@ public class GUI {
 		}
 		
 		public String getIdString() {
-			return idText.getText().toString();
+			return mFlowIdString;
+		}
+		
+		public boolean actionNotificationShown() {
+			return mNotificationShown;
+		}
+		
+		public void setActionNotificationShown() {
+			mNotificationShown = true;
 		}
 		
 		private void createView() {
 			layout = new LinearLayout(mContext);
 			layout.setOrientation(LinearLayout.VERTICAL);
 
-	        idText = new TextView(mContext);
-	        String idString = UUID.randomUUID().toString();
-	        idText.setText(idString);
-	        layout.addView(idText);
+			{
+		        TextView t = new TextView(mContext);
+		        t.setText(mFlowIdString);
+		        layout.addView(t);
+			}
+			
+			{
+				TextView t = new TextView(mContext);
+		        t.setText(mNotificationShown.toString());
+		        layout.addView(t);
+			}
 		}
 	}
 	
@@ -63,11 +93,11 @@ public class GUI {
 	public static class SubmitView implements OnClickListener {
 		Context mContext;
 		AutocontextServiceConnection mServiceConn;
-		Flow mFlow;
+		FlowMap mFlow;
 		LinearLayout layout;
 		TextView resultText;
 
-		SubmitView(Context context, Autocontext.Flow flow, AutocontextServiceConnection service) {
+		SubmitView(Context context, Autocontext.FlowMap flow, AutocontextServiceConnection service) {
 			mContext = context;
 			mFlow = flow;
 			mServiceConn = service;
@@ -96,6 +126,41 @@ public class GUI {
 	        resultText.setText("");
 	        layout.addView(resultText);
 		}
+	}
+	
+	public static class CalendarEventFlow implements IFlow {
+		Context mContext;
+		LinearLayout layout;
+		CalendarEvent mCalendarEvent;
+		
+		public CalendarEventFlow(Context context) {
+			mContext = context;
+			createView();
+		}
+		
+		public View getView() {
+			return layout;
+		}
+		
+		public FlowType getType() {
+			return FlowType.CONTEXT_CALENDAR_EVENT;
+		}
+		
+		public void setEvent(CalendarEvent calendarEvent) {
+			mCalendarEvent = calendarEvent;
+		}
+		
+		public CalendarEvent getEvent() {
+			return mCalendarEvent;
+		}
+		
+		private void createView() {
+			layout = new LinearLayout(mContext);
+			TextView textView = new TextView(mContext);
+			textView.setText("INTERNAL CALENDAR EVENT");
+			layout.addView(textView);
+		}
+		
 	}
 
 	public static class CalendarEventFilterFlow implements IFlow {
@@ -156,6 +221,54 @@ public class GUI {
 			TextView textView = new TextView(mContext);
 			textView.setText("Notify ON");
 			layout.addView(textView);
+		}
+	}
+	
+	public static class BrightnessFlow implements IFlow {
+		Context mContext;
+		LinearLayout layout;
+		SeekBar brightnessBar;
+		
+		public BrightnessFlow(Context context) {
+			mContext = context;
+			createView();
+		}
+		
+		public View getView() {
+			return layout;
+		}
+		
+		public FlowType getType() {
+			return FlowType.ACTION_BRIGHTNESS_VALUE;
+		}
+		
+		private void createView() {
+			layout = new LinearLayout(mContext);
+			
+			TextView textView = new TextView(mContext);
+			textView.setText("Brightness: ");
+			layout.addView(textView);
+			
+			brightnessBar = new SeekBar(mContext);
+			brightnessBar.setProgress(128);
+			brightnessBar.setMinimumWidth(100);
+			brightnessBar.setMax(255);
+			LayoutParams layoutParams = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
+			brightnessBar.setLayoutParams(layoutParams);
+			
+			layout.addView(brightnessBar);
+		}
+		
+		public void run() {
+			int brightnessValue = brightnessBar.getProgress();
+			Settings.System.putInt(
+					mContext.getContentResolver(), 
+					Settings.System.SCREEN_BRIGHTNESS, brightnessValue);
+			System.out.println("Changing brightness to " + brightnessValue);
+			
+			Intent defineIntent2 = new Intent(mContext, AutoBright.class);
+			mContext.startActivity(defineIntent2, Intent.FLAG_ACTIVITY_NEW_TASK);
+				
 		}
 	}
 
