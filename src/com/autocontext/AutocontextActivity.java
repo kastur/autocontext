@@ -18,17 +18,17 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 public class AutocontextActivity extends Activity {
 	LinearLayout layout;
+	LinearLayout flowLayout;
 
     Internal.AutocontextServiceConnection serviceConn;
     GUI.IdentifierFlow identifierFlow;
-    GUI.CalendarEventFilterFlow calendarFilterFlow;
-    GUI.NotifyFlow notifyFlow;
-    GUI.LaunchPackageFlow packageChooserFlow;
     GUI.SubmitView submitView;
 
     Flow flow;
@@ -36,39 +36,61 @@ public class AutocontextActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Context context = getApplicationContext();
+        final Context context = getApplicationContext();
+        final Activity activity = this;
 
         serviceConn = new Internal.AutocontextServiceConnection(context);
         identifierFlow = new GUI.IdentifierFlow(context);
-        calendarFilterFlow = new GUI.CalendarEventFilterFlow(context);
-        notifyFlow = new GUI.NotifyFlow(context);
-        packageChooserFlow = new GUI.LaunchPackageFlow(context, this);
         
         flow = new Flow();
         flow.add(identifierFlow);
-        flow.add(calendarFilterFlow);
-        flow.add(notifyFlow);
-        flow.add(packageChooserFlow);
+        
+        flow.add(new GUI.CalendarEventFilterFlow(context));
 
         layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(identifierFlow.getView());
-        layout.addView(calendarFilterFlow.getView());
-        layout.addView(notifyFlow.getView());
-        layout.addView(packageChooserFlow.getView());
+        
+        flowLayout = new LinearLayout(context);
+        flowLayout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(flowLayout);
+        
+        drawFlow();
+        
+        LinearLayout spinnerLayout = new LinearLayout(context);
+        spinnerLayout.setOrientation(LinearLayout.HORIZONTAL);
+        final Spinner spinner = new Spinner(this);
+        String[] items = {"Notification", "Launch app"};
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        spinner.setAdapter(spinnerArrayAdapter);
+        spinnerLayout.addView(spinner);
+        
+        Button addFlowButton = new Button(context);
+        addFlowButton.setText("Add");
+        addFlowButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				String selectedItem = spinner.getSelectedItem().toString();
+				if (selectedItem.equals("Notification")) {
+					flow.add(new GUI.NotifyFlow(context));
+					drawFlow();
+				} else if (selectedItem.equals("Launch app")) {
+					flow.add(new GUI.LaunchPackageFlow(context, activity));
+					drawFlow();
+				}
+			}
+		});
+        spinnerLayout.addView(addFlowButton);
+        
+        layout.addView(spinnerLayout);
 
         submitView = new GUI.SubmitView(context, flow, serviceConn);
         layout.addView(submitView.getView());
         setContentView(layout);
     }
-        
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	super.onActivityResult(requestCode, resultCode, data);
-    	if (requestCode == Globals.PACKAGE_CHOOSER_ID) {
-    		if (resultCode == RESULT_OK) {
-                packageChooserFlow.onActivityResult(requestCode, resultCode, data);
-    		}
+    
+    private void drawFlow() {
+    	flowLayout.removeAllViews();
+    	for (IFlow flowView : flow) {
+    		flowLayout.addView(flowView.getView());
     	}
     }
 }

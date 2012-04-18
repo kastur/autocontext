@@ -17,12 +17,10 @@ class Internal {
 			context.startService(new Intent(mContext, AutocontextService.class));
 	        Intent intent = new Intent(mContext, AutocontextService.class);
 	        ServiceConnection serviceConnection = new ServiceConnection() {
-				@Override
 				public void onServiceConnected(ComponentName name, IBinder binder) {
 					mService = ((AutocontextService.LocalBinder)binder).getService();
 				}
 
-				@Override
 				public void onServiceDisconnected(ComponentName name) {
 				}
 			};

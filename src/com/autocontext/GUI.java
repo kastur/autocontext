@@ -1,5 +1,7 @@
 package com.autocontext;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.autocontext.Autocontext.Flow;
@@ -10,11 +12,15 @@ import com.autocontext.Internal.AutocontextServiceConnection;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 
@@ -30,12 +36,10 @@ public class GUI {
 			createView();
 		}
 
-		@Override
 		public View getView() {
 			return layout;
 		}
 
-		@Override
 		public FlowType getType() {
 			return FlowType.IDENTIFIER;
 		}
@@ -104,12 +108,10 @@ public class GUI {
 			createView();
 		}
 
-		@Override
 		public View getView() {
 			return layout;
 		}
 		
-		@Override
 		public FlowType getType() {
 			return FlowType.CONTEXT_CALENDAR_EVENT_FILTER;
 		}
@@ -141,12 +143,10 @@ public class GUI {
 			createView();
 		}
 		
-		@Override
 		public View getView() {
 			return layout;
 		}
 		
-		@Override
 		public FlowType getType() {
 			return FlowType.ACTION_NOTIFY;
 		}
@@ -163,7 +163,7 @@ public class GUI {
 		Context mContext;
 		Activity mActivity;
 		LinearLayout layout;
-		TextView packageText;
+		Spinner packageSpinner;
 
 		public LaunchPackageFlow(Context context, Activity activity) {
 			mContext = context;
@@ -171,49 +171,36 @@ public class GUI {
 			createView();
 		}
 
-		@Override
 		public View getView() {
 			return layout;
 		}
 		
-		@Override
 		public FlowType getType() {
 			return FlowType.ACTION_LAUNCH_PACKAGE;
 		}
 
     	public String getSelectedPackage() {
-    		return packageText.getText().toString();
-    	}
-
-    	public void setSelectedPackage(String packageName) {
-    		packageText.setText(packageName);
-    	}
-
-    	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    		packageText.setText(data.getStringExtra("packageName"));
+    		String packageName = packageSpinner.getSelectedItem().toString();
+    		return packageName;
     	}
 
 		private void createView() {
 			layout = new LinearLayout(mContext);
 			layout.setOrientation(LinearLayout.VERTICAL);
+	        
+			PackageManager pkgMan = mContext.getPackageManager();
+			List<ApplicationInfo> pkgList = pkgMan.getInstalledApplications(0);
 
-	        TextView packageLabel = new TextView(mContext);
-	        packageLabel.setText("Select package:");
-	        layout.addView(packageLabel);
-	        
-	        packageText = new TextView(mContext);
-	        packageText.setText("com.android.browser");
-	        layout.addView(packageText);
-	        
-	        Button launchPackageListButton = new Button(mContext);
-	        launchPackageListButton.setText("Find app");
-	        launchPackageListButton.setOnClickListener(new OnClickListener() {
-				public void onClick(View view) {
-					Intent activityIntent = new Intent(view.getContext(), SelectPackageActivity.class);
-	                mActivity.startActivityForResult(activityIntent, Globals.PACKAGE_CHOOSER_ID);
-				}
-			});
-	        layout.addView(launchPackageListButton);
+			ArrayList<String> packages = new ArrayList<String>();
+			packages.add("com.android.browser");
+			for (ApplicationInfo pkg : pkgList) {
+				packages.add(pkg.processName);
+			}
+			
+			ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, packages);
+			packageSpinner = new Spinner(mActivity);
+			packageSpinner.setAdapter(spinnerArrayAdapter);
+			layout.addView(packageSpinner);
     	}
     }
 }
