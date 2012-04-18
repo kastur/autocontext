@@ -1,6 +1,10 @@
 package com.autocontext;
 
+import java.util.LinkedList;
 import java.util.List;
+
+import com.autocontext.Autocontext.Flow;
+import com.autocontext.Autocontext.IFlow;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -15,97 +19,55 @@ import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 public class AutocontextActivity extends Activity {
 	LinearLayout layout;
-	TextView packageText;
-	private static final int SELECT_PACKAGE_ID = 1;
-	private AutocontextService mService;
+
+    Internal.AutocontextServiceConnection serviceConn;
+    GUI.IdentifierFlow identifierFlow;
+    GUI.CalendarEventFilterFlow calendarFilterFlow;
+    GUI.NotifyFlow notifyFlow;
+    GUI.LaunchPackageFlow packageChooserFlow;
+    GUI.SubmitView submitView;
+
+    Flow flow;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mService = null;
-        startService(new Intent(this, AutocontextService.class));
-        bindService(
-        		new Intent(this, AutocontextService.class),
-        		new ServiceConnection() {
-					
-					public void onServiceDisconnected(ComponentName name) {
-					}
-					
-					public void onServiceConnected(ComponentName name, IBinder binder) {
-						mService = ((AutocontextService.LocalBinder)binder).getService();
-					}
-				},
-				Context.BIND_AUTO_CREATE);
+        Context context = getApplicationContext();
+
+        serviceConn = new Internal.AutocontextServiceConnection(context);
+        identifierFlow = new GUI.IdentifierFlow(context);
+        calendarFilterFlow = new GUI.CalendarEventFilterFlow(context);
+        notifyFlow = new GUI.NotifyFlow(context);
+        packageChooserFlow = new GUI.LaunchPackageFlow(context, this);
         
-        layout = new LinearLayout(this);
+        flow = new Flow();
+        flow.add(identifierFlow);
+        flow.add(calendarFilterFlow);
+        flow.add(notifyFlow);
+        flow.add(packageChooserFlow);
+
+        layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(identifierFlow.getView());
+        layout.addView(calendarFilterFlow.getView());
+        layout.addView(notifyFlow.getView());
+        layout.addView(packageChooserFlow.getView());
+
+        submitView = new GUI.SubmitView(context, flow, serviceConn);
+        layout.addView(submitView.getView());
         setContentView(layout);
-        
-        TextView filterLabel = new TextView(this);
-        filterLabel.setText("Calender event title contains:");
-        layout.addView(filterLabel);
-        
-        final EditText filterText = new EditText(this);
-        filterText.setText("a");
-        layout.addView(filterText);
-        
-        
-        TextView packageLabel = new TextView(this);
-        packageLabel.setText("Launch application:");
-        layout.addView(packageLabel);
-        
-        packageText = new TextView(this);
-        packageText.setText("com.android.browser");
-        layout.addView(packageText);
-        
-        {
-	        Button b = new Button(this);
-	        b.setText("Find app");
-	        b.setOnClickListener(new OnClickListener() {
-				public void onClick(View view) {
-					Intent activityIntent = new Intent(view.getContext(), SelectPackageActivity.class);
-	                startActivityForResult(activityIntent, SELECT_PACKAGE_ID);
-				}
-			});
-	        layout.addView(b);
-        }
-        
-        {
-	        Button b = new Button(this);
-	        b.setText("Done");
-	        b.setOnClickListener(new OnClickListener() {
-				public void onClick(View view) {
-	    			PackageManager manager = getPackageManager();
-	    			String packageName = (String) packageText.getText();
-	    			List<CalendarHelper.CalendarEvent> events = CalendarHelper.getEventsList(getApplicationContext(), 1, filterText.getText());
-	    			for (CalendarHelper.CalendarEvent event : events) {
-	    				mService.addCalendarAction(event, packageName);
-	    			}
-	    			
-	    		}
-			});
-	        layout.addView(b);
-        }
     }
-    
-    @Override
-    protected void onResume() {
-    	super.onResume();
-    	
-    }
-    
+        
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     	super.onActivityResult(requestCode, resultCode, data);
-    	if (requestCode == SELECT_PACKAGE_ID) {
+    	if (requestCode == Globals.PACKAGE_CHOOSER_ID) {
     		if (resultCode == RESULT_OK) {
-    			packageText.setText(data.getStringExtra("packageName"));
+                packageChooserFlow.onActivityResult(requestCode, resultCode, data);
     		}
     	}
     }

@@ -11,14 +11,13 @@ import android.content.pm.PackageManager;
 
 public class NotificationHelper {
 	
-	public static void QueueNotification(Context context, Integer notification_id, Date begin, String ticker, String contentTitle, String contentText, Intent intent) {
+	public static void QueueNotification(Context context, Integer notification_id, Date begin, String ticker, String contentTitle, String contentText, PendingIntent intent) {
 		NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		int icon = R.drawable.ic_launcher;
 		long when = begin.getTime();
 		Notification notification = new Notification(icon, ticker, when);
 
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
-		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+		notification.setLatestEventInfo(context, contentTitle, contentText, intent);
 		
 		mNotificationManager.notify(notification_id, notification);
 	}
