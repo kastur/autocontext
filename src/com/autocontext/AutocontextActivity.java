@@ -1,130 +1,95 @@
 package com.autocontext;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import com.autocontext.Autocontext.FlowMap;
-import com.autocontext.Autocontext.FlowType;
-import com.autocontext.Autocontext.IFlow;
+import com.autocontext.Autocontext.ActionFlow;
+import com.autocontext.Autocontext.FlowManager;
+import com.autocontext.Autocontext.IAction;
+import com.autocontext.Autocontext.IContext;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.LabeledIntent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.text.Layout;
-import android.view.Gravity;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.TableLayout;
-import android.widget.TableRow;
+import android.widget.TextView;
+
 
 public class AutocontextActivity extends Activity {
 	LinearLayout layout;
-	
-
-    Internal.AutocontextServiceConnection serviceConn;
-    GUI.IdentifierFlow identifierFlow;
-    GUI.SubmitView submitView;
-
-    FlowMap flowMap;
-    TableLayout flowLayout;
-    LinkedList<TableRow> elemLayouts = new LinkedList<TableRow>();
+	FlowManager mFlowManager;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final Context context = getApplicationContext();
-        final Activity activity = this;
-
-        serviceConn = new Internal.AutocontextServiceConnection(context);
-        identifierFlow = new GUI.IdentifierFlow(context);
+        final Context applicationContext = getApplicationContext();
         
-        flowMap = new FlowMap();
-        flowMap.put(FlowType.IDENTIFIER, identifierFlow);
-        
-        //flow.put(FlowType.CONTEXT_CALENDAR_EVENT_FILTER, new GUI.CalendarEventFilterFlow(context));
-        flowMap.put(FlowType.CONTEXT_IMMEDIATE, new GUI.ImmediateContextFlow(context));
-        flowMap.put(FlowType.ACTION_BRIGHTNESS_VALUE, new GUI.BrightnessFlow(context));
+        startService(new Intent(applicationContext, AutocontextService.class));
+        Intent intent = new Intent(applicationContext, AutocontextService.class);
+        ServiceConnection serviceConnection = new ServiceConnection() {
+			public void onServiceConnected(ComponentName name, IBinder binder) {
+				mFlowManager = ((AutocontextService.LocalBinder)binder).getFlowManager();
+				onConnect();
+			}
 
-        layout = new LinearLayout(context);
+			public void onServiceDisconnected(ComponentName name) {
+			}
+		};
+
+		bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+        
+        layout = new LinearLayout(applicationContext);
         layout.setOrientation(LinearLayout.VERTICAL);
         
-        flowLayout = new TableLayout(context);
-        flowLayout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(flowLayout);
-        
-        drawFlow(context);
-        
-        LinearLayout spinnerLayout = new LinearLayout(context);
-        spinnerLayout.setOrientation(LinearLayout.HORIZONTAL);
-        final Spinner spinner = new Spinner(this);
-        String[] items = {"Provide Notification", "Launch App", "Set Display Brightness", "Set Wifi State"};
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
-        spinner.setAdapter(spinnerArrayAdapter);
-        spinnerLayout.addView(spinner);
-        
-        Button addFlowButton = new Button(context);
-        addFlowButton.setText("Add");
-        addFlowButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				String selectedItem = spinner.getSelectedItem().toString();
-				if (selectedItem.equals("Provide Notification")) {
-					flowMap.put(FlowType.ACTION_NOTIFY, new GUI.NotifyFlow(context));
-				} else if (selectedItem.equals("Launch App")) {
-					flowMap.put(FlowType.ACTION_LAUNCH_PACKAGE, new GUI.LaunchPackageFlow(context, activity));
-				} else if (selectedItem.equals("Set Display Brightness")) {
-					flowMap.put(FlowType.ACTION_BRIGHTNESS_VALUE, new GUI.BrightnessFlow(context));
-				} else if (selectedItem.equals("Set Wifi State")) {
-					flowMap.put(FlowType.ACTION_WIFI, new GUI.WifiFlow(context));
-				}
-				drawFlow(context);
-			}
-		});
-        spinnerLayout.addView(addFlowButton);
-        
-        layout.addView(spinnerLayout);
-
-        submitView = new GUI.SubmitView(context, flowMap, serviceConn);
-        layout.addView(submitView.getView());
         setContentView(layout);
     }
     
-    private void drawFlow(final Context context) {
-    	// Clear the TableLayout and each of the rows.
-    	for (TableRow elemLayout : elemLayouts) {
-    		elemLayout.removeAllViews();
-    	}
-    	flowLayout.removeAllViews();
-    	
-    	// Add one row per flow.
-    	for (final FlowType flowType : flowMap.keySet()) {
-    		IFlow flowView = flowMap.get(flowType);
-    		TableRow elemLayout = new TableRow(context);
-    		
-    		elemLayout.addView(flowView.getView());
-    		elemLayouts.add(elemLayout);
-    		
-    		Button removeFlowButton = new Button(context);
-    		removeFlowButton.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					flowMap.remove(flowType);
-					drawFlow(context);
-				}
-			});
-    		removeFlowButton.setText("X");
-    		removeFlowButton.setGravity(Gravity.RIGHT);
-    		elemLayout.addView(removeFlowButton);
-    		flowLayout.addView(elemLayout);
-    	}
+    public void onConnect() {
+    	final Context applicationContext = getApplicationContext();
+        {
+        TextView textView = new TextView(applicationContext);
+        textView.setText("Configure contexts");
+        layout.addView(textView);
+        layout.addView(getContextsView(applicationContext));
+        }
+        
+        {
+        TextView textView = new TextView(applicationContext);
+        textView.setText("Configure action flows");
+        layout.addView(textView);
+        layout.addView(getActionFlowsView(applicationContext));
+        }
+        
+        {
+        TextView textView = new TextView(applicationContext);
+        textView.setText("Configure context <--> action flow mappings");
+        layout.addView(textView);
+        //layout.addView(getMappingView());
+        }
     }
+    
+    private View getContextsView(Context activityContext) {
+    	LinearLayout layout = new LinearLayout(activityContext);
+    	
+    	for (IContext context : mFlowManager.getContexts()) {
+    		layout.addView(context.getView(activityContext));
+    	}
+    	return layout;
+    }
+    
+    private View getActionFlowsView(Context activityContext) {
+    	LinearLayout layout = new LinearLayout(activityContext);
+    	
+    	for (ActionFlow actionFlow : mFlowManager.getActionFlows()) {
+    		for (IAction action : actionFlow) {
+    			layout.addView(action.getView(activityContext));
+    		}
+    	}
+    	return layout;
+    }
+    
 }
