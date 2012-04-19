@@ -18,6 +18,7 @@ import com.autocontext.GUI.CalendarEventFlow;
 import com.autocontext.GUI.IdentifierFlow;
 import com.autocontext.GUI.LaunchPackageFlow;
 import com.autocontext.GUI.NotifyFlow;
+import com.autocontext.GUI.WifiFlow;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -87,6 +88,10 @@ public class AutocontextService extends Service {
 			IdentifierFlow flow = (IdentifierFlow)flowMap.get(FlowType.IDENTIFIER); 
 			flow_id = flow.getIdString();
 			registeredFlows.put(flow.getIdString(), flowMap);
+		}
+		
+		if (flowMap.containsKey(FlowType.CONTEXT_IMMEDIATE)) {
+			performActions(flow_id);
 		}
 	
 		if (flowMap.containsKey(FlowType.CONTEXT_CALENDAR_EVENT_FILTER)) {
@@ -176,6 +181,11 @@ public class AutocontextService extends Service {
 		
 		if (flowMap.containsKey(FlowType.ACTION_BRIGHTNESS_VALUE)) {
 			BrightnessFlow flow = (BrightnessFlow)flowMap.get(FlowType.ACTION_BRIGHTNESS_VALUE);
+			flow.run();
+		}
+		
+		if (flowMap.containsKey(FlowType.ACTION_WIFI)) {
+			WifiFlow flow = (WifiFlow)flowMap.get(FlowType.ACTION_WIFI);
 			flow.run();
 		}
 		

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.view.View;
@@ -27,6 +28,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -89,6 +93,44 @@ public class GUI {
 		}
 	}
 	
+	private static abstract class NotConfigurableContextFlow implements IFlow {
+		Context mContext;
+		LinearLayout layout;
+		String mText;
+		
+		public NotConfigurableContextFlow(Context context, String text) {
+			mContext = context;
+			mText = text;
+			createView();
+		}
+		
+		public View getView() {
+			return layout;
+		}
+		
+		public abstract FlowType getType();
+		
+		private void createView() {
+			layout = new LinearLayout(mContext);
+			layout.setOrientation(LinearLayout.HORIZONTAL);
+			
+			TextView textView = new TextView(mContext);
+			textView.setText(mText);
+			layout.addView(textView);
+		}
+	}
+	
+	public static class DisplayOffFlow extends NotConfigurableContextFlow {
+
+		public DisplayOffFlow(Context context) {
+			super(context, "When the display is off");
+		}
+
+		@Override
+		public FlowType getType() {
+			return FlowType.CONTEXT_EVENT_DISPLAY_OFF;
+		}	
+	}
 
 	public static class SubmitView implements OnClickListener {
 		Context mContext;
@@ -199,6 +241,31 @@ public class GUI {
 		}
 	}
 	
+	public static class ImmediateContextFlow implements IFlow {
+		Context mContext;
+		LinearLayout layout;
+		
+		public ImmediateContextFlow(Context context) {
+			mContext = context;
+			createView();
+		}
+		
+		public View getView() {
+			return layout;
+		}
+		
+		public FlowType getType() {
+			return FlowType.CONTEXT_IMMEDIATE;
+		}
+		
+		private void createView() {
+			layout = new LinearLayout(mContext);
+			TextView textView = new TextView(mContext);
+			textView.setText("INTERNAL: Immediate context.");
+			layout.addView(textView);
+		}
+	}
+	
 	public static class NotifyFlow implements IFlow {
 		Context mContext;
 		LinearLayout layout;
@@ -266,9 +333,65 @@ public class GUI {
 					Settings.System.SCREEN_BRIGHTNESS, brightnessValue);
 			System.out.println("Changing brightness to " + brightnessValue);
 			
-			Intent defineIntent2 = new Intent(mContext, AutoBright.class);
-			mContext.startActivity(defineIntent2, Intent.FLAG_ACTIVITY_NEW_TASK);
-				
+			Intent brightnessIntent = new Intent(mContext, AutoBright.class);
+			PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0 /* not used */, brightnessIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+			try {
+				pendingIntent.send();
+			} catch (CanceledException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static class WifiFlow implements IFlow, OnCheckedChangeListener {
+		Context mContext;
+		Activity mActivity;
+		LinearLayout layout;
+		
+		public boolean mWifiState; 
+		
+		
+		public WifiFlow(Context context) {
+			mContext = context;
+			mWifiState = false;
+			createView();
+		}
+
+		@Override
+		public FlowType getType() {
+			return FlowType.ACTION_WIFI;
+		}
+
+		@Override
+		public View getView() {
+			return layout;
+		}
+		
+		public void run() {
+			System.out.println("Setting WifiState to " + mWifiState);
+			WifiManager wifiManager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
+			wifiManager.setWifiEnabled(mWifiState);
+		}
+		
+		private void createView() {
+			layout = new LinearLayout(mContext);
+			layout.setOrientation(LinearLayout.HORIZONTAL);
+			
+			TextView textView = new TextView(mContext);
+			textView.setText("Wifi state: ");
+			layout.addView(textView);
+			
+			CheckBox checkBox = new CheckBox(mContext);
+			checkBox.setChecked(mWifiState);
+			layout.addView(checkBox);
+			
+			checkBox.setOnCheckedChangeListener(this);
+		}
+
+		@Override
+		public void onCheckedChanged(CompoundButton buttonView,
+				boolean isChecked) {
+			mWifiState = isChecked;
 		}
 	}
 

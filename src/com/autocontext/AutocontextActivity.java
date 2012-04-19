@@ -36,7 +36,7 @@ public class AutocontextActivity extends Activity {
     GUI.IdentifierFlow identifierFlow;
     GUI.SubmitView submitView;
 
-    FlowMap flow;
+    FlowMap flowMap;
     TableLayout flowLayout;
     LinkedList<TableRow> elemLayouts = new LinkedList<TableRow>();
 	
@@ -49,11 +49,12 @@ public class AutocontextActivity extends Activity {
         serviceConn = new Internal.AutocontextServiceConnection(context);
         identifierFlow = new GUI.IdentifierFlow(context);
         
-        flow = new FlowMap();
-        flow.put(FlowType.IDENTIFIER, identifierFlow);
+        flowMap = new FlowMap();
+        flowMap.put(FlowType.IDENTIFIER, identifierFlow);
         
-        flow.put(FlowType.CONTEXT_CALENDAR_EVENT_FILTER, new GUI.CalendarEventFilterFlow(context));
-        flow.put(FlowType.ACTION_BRIGHTNESS_VALUE, new GUI.BrightnessFlow(context));
+        //flow.put(FlowType.CONTEXT_CALENDAR_EVENT_FILTER, new GUI.CalendarEventFilterFlow(context));
+        flowMap.put(FlowType.CONTEXT_IMMEDIATE, new GUI.ImmediateContextFlow(context));
+        flowMap.put(FlowType.ACTION_BRIGHTNESS_VALUE, new GUI.BrightnessFlow(context));
 
         layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -67,7 +68,7 @@ public class AutocontextActivity extends Activity {
         LinearLayout spinnerLayout = new LinearLayout(context);
         spinnerLayout.setOrientation(LinearLayout.HORIZONTAL);
         final Spinner spinner = new Spinner(this);
-        String[] items = {"Provide Notification", "Launch App", "Set Display Brightness"};
+        String[] items = {"Provide Notification", "Launch App", "Set Display Brightness", "Set Wifi State"};
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items);
         spinner.setAdapter(spinnerArrayAdapter);
         spinnerLayout.addView(spinner);
@@ -77,12 +78,14 @@ public class AutocontextActivity extends Activity {
         addFlowButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				String selectedItem = spinner.getSelectedItem().toString();
-				if (selectedItem.equals("Notification")) {
-					flow.put(FlowType.ACTION_NOTIFY, new GUI.NotifyFlow(context));
-				} else if (selectedItem.equals("Launch app")) {
-					flow.put(FlowType.ACTION_LAUNCH_PACKAGE, new GUI.LaunchPackageFlow(context, activity));
+				if (selectedItem.equals("Provide Notification")) {
+					flowMap.put(FlowType.ACTION_NOTIFY, new GUI.NotifyFlow(context));
+				} else if (selectedItem.equals("Launch App")) {
+					flowMap.put(FlowType.ACTION_LAUNCH_PACKAGE, new GUI.LaunchPackageFlow(context, activity));
 				} else if (selectedItem.equals("Set Display Brightness")) {
-					flow.put(FlowType.ACTION_BRIGHTNESS_VALUE, new GUI.BrightnessFlow(context));
+					flowMap.put(FlowType.ACTION_BRIGHTNESS_VALUE, new GUI.BrightnessFlow(context));
+				} else if (selectedItem.equals("Set Wifi State")) {
+					flowMap.put(FlowType.ACTION_WIFI, new GUI.WifiFlow(context));
 				}
 				drawFlow(context);
 			}
@@ -91,7 +94,7 @@ public class AutocontextActivity extends Activity {
         
         layout.addView(spinnerLayout);
 
-        submitView = new GUI.SubmitView(context, flow, serviceConn);
+        submitView = new GUI.SubmitView(context, flowMap, serviceConn);
         layout.addView(submitView.getView());
         setContentView(layout);
     }
@@ -104,7 +107,8 @@ public class AutocontextActivity extends Activity {
     	flowLayout.removeAllViews();
     	
     	// Add one row per flow.
-    	for (final IFlow flowView : flow.values()) {
+    	for (final FlowType flowType : flowMap.keySet()) {
+    		IFlow flowView = flowMap.get(flowType);
     		TableRow elemLayout = new TableRow(context);
     		
     		elemLayout.addView(flowView.getView());
@@ -113,7 +117,7 @@ public class AutocontextActivity extends Activity {
     		Button removeFlowButton = new Button(context);
     		removeFlowButton.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					flow.remove(flowView);
+					flowMap.remove(flowType);
 					drawFlow(context);
 				}
 			});
