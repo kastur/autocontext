@@ -2,7 +2,7 @@ package com.autocontext;
 
 import com.autocontext.Autocontext.ActionFlow;
 import com.autocontext.Autocontext.ContextActionPair;
-import com.autocontext.Autocontext.FlowManager;
+import com.autocontext.FlowManager;
 import com.autocontext.Autocontext.IAction;
 import com.autocontext.Autocontext.IContext;
 import com.autocontext.actions.ToastAction;

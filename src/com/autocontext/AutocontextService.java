@@ -1,6 +1,7 @@
 package com.autocontext;
 
-import com.autocontext.Autocontext.FlowManager;
+import com.autocontext.Autocontext.IContextObserver;
+import com.autocontext.FlowManager;
 import com.autocontext.observers.ImmediateContextObserver;
 
 import android.app.Service;

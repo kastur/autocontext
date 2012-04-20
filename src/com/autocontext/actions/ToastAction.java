@@ -22,7 +22,7 @@ public class ToastAction extends IAction {
 	LinearLayout dispLayout;
 	
 	@Override
-	public void run() {
+	public void run(Bundle payload) {
 		Toast.makeText(mAppContext, params.getString("toastText"), Toast.LENGTH_SHORT).show();
 	}
 	

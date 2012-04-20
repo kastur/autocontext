@@ -3,6 +3,7 @@ package com.autocontext.observers;
 import java.util.HashSet;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import com.autocontext.Autocontext.ContextType;
 import com.autocontext.Autocontext.IContext;
@@ -34,8 +35,10 @@ public class ImmediateContextObserver implements IContextObserver {
 	}
 	
 	public void triggerContext() {
+		Bundle payload = new Bundle();
+		payload.putLong(ContextType.CONTEXT_IMMEDIATE.name() + "_timestamp", System.currentTimeMillis());
 		for (IContext context : mRegisteredContexts) {
-			mContextReceiver.triggerContext(context);
+			mContextReceiver.triggerContext(context, payload);
 		}
 	}
 	

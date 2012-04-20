@@ -9,7 +9,6 @@ import com.autocontext.observers.ImmediateContextObserver;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 
 public class Autocontext {
@@ -65,88 +64,17 @@ public class Autocontext {
 			onCreate(new Bundle());
 		}
 		public abstract void onCreate(Bundle savedState);
+		public abstract void run(Bundle payload);
 		public abstract View getEditView();
 		public abstract View getDispView();
-		public abstract void run();
 	}
 
 	public static class ActionFlow extends LinkedList<IAction> {
 		private static final long serialVersionUID = 44044658025241362L;
 	}
 	
-	public static class FlowManager implements IContextReceiver {
-		HashMap<ContextType, IContextObserver> mContextObservers;
-		HashMap<ContextType, IContext> mContexts;
-		HashSet<ActionFlow> mActionFlows;
-		
-		HashSet<ContextActionPair> mContextActionPairs;
-		
-		Context mApplicationContext;
-		
-		public FlowManager() {
-			mContextObservers = new HashMap<Autocontext.ContextType, Autocontext.IContextObserver>();
-			mContexts = new HashMap<Autocontext.ContextType, Autocontext.IContext>();
-			mActionFlows = new HashSet<Autocontext.ActionFlow>();
-			mContextActionPairs = new HashSet<Autocontext.ContextActionPair>();
-		}
-		
-		public void init(Context context) {
-			mApplicationContext = context.getApplicationContext();
-			for (IContextObserver observer : mContextObservers.values()) {
-				observer.init(context);
-			}
-		}
-
-		public void registerContextObserver(IContextObserver contextObserver) {
-			mContextObservers.put(contextObserver.getType(), contextObserver);
-			contextObserver.registerCallback(this);
-		}
-		
-		public void registerContext(IContext context) {
-			mContexts.put(context.getType(), context);
-			mContextObservers.get(context.getType()).registerContext(context);
-		}
-		
-		public void registerActionFlow(ActionFlow actionFlow) {
-			mActionFlows.add(actionFlow);
-		}
-		
-		public void registerContextAction(IContext context, ActionFlow actionFlow) {
-			ContextActionPair pair = new ContextActionPair(context, actionFlow);
-			mContextActionPairs.add(pair);
-		}
-		
-		public void triggerImmediateContexts() {
-			ImmediateContextObserver immediateContextObserver = 
-			(ImmediateContextObserver)mContextObservers.get(ContextType.CONTEXT_IMMEDIATE);
-			immediateContextObserver.triggerContext();
-		}
-
-		public void triggerContext(IContext context) {
-			for (ContextActionPair pair : mContextActionPairs) {
-				if (pair.getContext().equals(context)) {
-					for (IAction action : pair.getActions()) {
-						action.run();
-					}
-				}
-			}
-		}
-
-		public Collection<IContext> getContexts() {
-			return mContexts.values();
-		}
-		
-		public Collection<ActionFlow> getActionFlows() {
-			return mActionFlows;
-		}
-		
-		public Collection<ContextActionPair> getContextActions() {
-			return mContextActionPairs;
-		}
-	}
-	
 	public static interface IContextReceiver {
-		public abstract void triggerContext(IContext context);
+		public abstract void triggerContext(IContext context, Bundle payload);
 	}
 	
 	public static interface IContextObserver {
