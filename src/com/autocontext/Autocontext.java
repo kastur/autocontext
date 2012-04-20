@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import com.autocontext.observers.ImmediateContextObserver;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 
@@ -45,14 +46,28 @@ public class Autocontext {
 		}
 	}
 	
-	public static interface IContext {
+	public static abstract class IContext {
+		protected Context mAppContext;
+		public IContext(Context context) {
+			mAppContext = context;
+			onCreate(new Bundle());
+		}
+		public abstract void onCreate(Bundle savedState);
 		public abstract ContextType getType();
-		public abstract View getView(Context context);
+		public abstract View getEditView();
+		public abstract View getDispView();
 	}
 	
-	public static interface IAction {
-		public abstract void run(Context context);
-		public abstract View getView(Context context);
+	public static abstract class IAction {
+		protected Context mAppContext;
+		public IAction(Context context) {
+			mAppContext = context;
+			onCreate(new Bundle());
+		}
+		public abstract void onCreate(Bundle savedState);
+		public abstract View getEditView();
+		public abstract View getDispView();
+		public abstract void run();
 	}
 
 	public static class ActionFlow extends LinkedList<IAction> {
@@ -111,7 +126,7 @@ public class Autocontext {
 			for (ContextActionPair pair : mContextActionPairs) {
 				if (pair.getContext().equals(context)) {
 					for (IAction action : pair.getActions()) {
-						action.run(mApplicationContext);
+						action.run();
 					}
 				}
 			}

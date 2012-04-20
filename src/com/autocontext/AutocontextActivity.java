@@ -53,11 +53,12 @@ public class AutocontextActivity extends Activity {
     }
     
     public void onConnect() {
-    	ImmediateContext immediateContext = new ImmediateContext();
+    	Context appContext = getApplicationContext();
+    	ImmediateContext immediateContext = new ImmediateContext(appContext);
     	mFlowManager.registerContext(immediateContext);
     	
     	ActionFlow actionFlow = new ActionFlow();
-    	actionFlow.add(new ToastAction());
+    	actionFlow.add(new ToastAction(appContext));
     	mFlowManager.registerActionFlow(actionFlow);
     	
     	mFlowManager.registerContextAction(immediateContext, actionFlow);
@@ -101,7 +102,7 @@ public class AutocontextActivity extends Activity {
     private View getContextsView(Context activityContext) {
     	LinearLayout layout = new LinearLayout(activityContext);
     	for (IContext context : mFlowManager.getContexts()) {
-    		layout.addView(context.getView(activityContext));
+    		layout.addView(context.getEditView());
     	}
     	return layout;
     }
@@ -111,7 +112,7 @@ public class AutocontextActivity extends Activity {
     	
     	for (ActionFlow actionFlow : mFlowManager.getActionFlows()) {
     		for (IAction action : actionFlow) {
-    			layout.addView(action.getView(activityContext));
+    			layout.addView(action.getEditView());
     		}
     	}
     	return layout;
@@ -121,9 +122,9 @@ public class AutocontextActivity extends Activity {
     	LinearLayout layout = new LinearLayout(activityContext);
     	
     	for (ContextActionPair pair : mFlowManager.getContextActions()) {
-    		layout.addView(pair.getContext().getView(activityContext));
+    		layout.addView(pair.getContext().getDispView());
     		for (IAction action : pair.getActions()) {
-    			layout.addView(action.getView(activityContext));
+    			layout.addView(action.getDispView());
     		}
     	}
     	return layout;

@@ -12,45 +12,62 @@ import android.widget.Toast;
 
 import com.autocontext.Autocontext.IAction;
 
-public class ToastAction implements IAction {
-	final Bundle mParams;
+public class ToastAction extends IAction {
+	public ToastAction(Context context) {
+		super(context);
+	}
+
+	Bundle params;
+	LinearLayout editLayout;
+	LinearLayout dispLayout;
 	
-	public ToastAction() {
-		mParams = new Bundle();
+	@Override
+	public void run() {
+		Toast.makeText(mAppContext, params.getString("toastText"), Toast.LENGTH_SHORT).show();
 	}
 	
 	@Override
-	public void run(Context context) {
-		Toast.makeText(context, mParams.getString("toastText"), Toast.LENGTH_SHORT).show();
-	}
-	
-	@Override
-	public View getView(Context context) {
-		LinearLayout layout = new LinearLayout(context);
+	public void onCreate(Bundle savedState) {
+		params = savedState;
 		
-		TextView textView = new TextView(context);
+		editLayout = new LinearLayout(mAppContext);
+		TextView textView = new TextView(mAppContext);
 		textView.setText("Message: ");
-		layout.addView(textView);
+		editLayout.addView(textView);
+		final EditText editText = new EditText(mAppContext);
+		editText.setText(params.getString("toastText"));
+		editLayout.addView(editText);
 		
-		final EditText editText = new EditText(context);
-		editText.setText(mParams.getString("toastText"));
+		dispLayout = new LinearLayout(mAppContext);
+		final TextView dispView = new TextView(mAppContext);
+		dispView.setText(params.getString("toastText"));
+		dispLayout.addView(dispView);
+		
 		editText.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				dispView.setText(s);
 			}
 			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
-			}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 			
 			@Override
 			public void afterTextChanged(Editable s) {
-				mParams.putString("toastText", s.toString());
+				params.putString("toastText", s.toString());
 			}
 		});
-		layout.addView(editText);
+		
+		
+	}
+	
+	@Override
+	public View getEditView() {
+		return editLayout;
+	}
 
-		return layout;
+	@Override
+	public View getDispView() {
+		return dispLayout;
 	}
 }
