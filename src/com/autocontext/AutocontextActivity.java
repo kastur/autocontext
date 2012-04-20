@@ -1,9 +1,12 @@
 package com.autocontext;
 
 import com.autocontext.Autocontext.ActionFlow;
+import com.autocontext.Autocontext.ContextActionPair;
 import com.autocontext.Autocontext.FlowManager;
 import com.autocontext.Autocontext.IAction;
 import com.autocontext.Autocontext.IContext;
+import com.autocontext.actions.ToastAction;
+import com.autocontext.contexts.ImmediateContext;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -13,6 +16,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -49,6 +53,18 @@ public class AutocontextActivity extends Activity {
     }
     
     public void onConnect() {
+    	ImmediateContext immediateContext = new ImmediateContext();
+    	mFlowManager.registerContext(immediateContext);
+    	
+    	ActionFlow actionFlow = new ActionFlow();
+    	actionFlow.add(new ToastAction());
+    	mFlowManager.registerActionFlow(actionFlow);
+    	
+    	mFlowManager.registerContextAction(immediateContext, actionFlow);
+    	draw();
+    }
+    
+    public void draw() {
     	final Context applicationContext = getApplicationContext();
         {
         TextView textView = new TextView(applicationContext);
@@ -68,13 +84,22 @@ public class AutocontextActivity extends Activity {
         TextView textView = new TextView(applicationContext);
         textView.setText("Configure context <--> action flow mappings");
         layout.addView(textView);
-        //layout.addView(getMappingView());
+        layout.addView(getContextActionView(applicationContext));
         }
+        
+        Button triggerImmediateButton = new Button(applicationContext);
+        triggerImmediateButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mFlowManager.triggerImmediateContexts();
+			}
+		});
+        triggerImmediateButton.setText("Trigger immediate contexts.");
+        layout.addView(triggerImmediateButton);
     }
     
     private View getContextsView(Context activityContext) {
     	LinearLayout layout = new LinearLayout(activityContext);
-    	
     	for (IContext context : mFlowManager.getContexts()) {
     		layout.addView(context.getView(activityContext));
     	}
@@ -86,6 +111,18 @@ public class AutocontextActivity extends Activity {
     	
     	for (ActionFlow actionFlow : mFlowManager.getActionFlows()) {
     		for (IAction action : actionFlow) {
+    			layout.addView(action.getView(activityContext));
+    		}
+    	}
+    	return layout;
+    }
+    
+    private View getContextActionView(Context activityContext) {
+    	LinearLayout layout = new LinearLayout(activityContext);
+    	
+    	for (ContextActionPair pair : mFlowManager.getContextActions()) {
+    		layout.addView(pair.getContext().getView(activityContext));
+    		for (IAction action : pair.getActions()) {
     			layout.addView(action.getView(activityContext));
     		}
     	}

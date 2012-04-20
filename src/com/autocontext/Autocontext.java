@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+import com.autocontext.observers.ImmediateContextObserver;
+
 import android.content.Context;
 import android.os.Handler;
 import android.view.View;
@@ -64,13 +66,17 @@ public class Autocontext {
 		
 		HashSet<ContextActionPair> mContextActionPairs;
 		
+		Context mApplicationContext;
+		
 		public FlowManager() {
 			mContextObservers = new HashMap<Autocontext.ContextType, Autocontext.IContextObserver>();
 			mContexts = new HashMap<Autocontext.ContextType, Autocontext.IContext>();
 			mActionFlows = new HashSet<Autocontext.ActionFlow>();
+			mContextActionPairs = new HashSet<Autocontext.ContextActionPair>();
 		}
 		
 		public void init(Context context) {
+			mApplicationContext = context.getApplicationContext();
 			for (IContextObserver observer : mContextObservers.values()) {
 				observer.init(context);
 			}
@@ -94,9 +100,21 @@ public class Autocontext {
 			ContextActionPair pair = new ContextActionPair(context, actionFlow);
 			mContextActionPairs.add(pair);
 		}
+		
+		public void triggerImmediateContexts() {
+			ImmediateContextObserver immediateContextObserver = 
+			(ImmediateContextObserver)mContextObservers.get(ContextType.CONTEXT_IMMEDIATE);
+			immediateContextObserver.triggerContext();
+		}
 
 		public void triggerContext(IContext context) {
-			System.out.println("NOT IMPLEMENTED");
+			for (ContextActionPair pair : mContextActionPairs) {
+				if (pair.getContext().equals(context)) {
+					for (IAction action : pair.getActions()) {
+						action.run(mApplicationContext);
+					}
+				}
+			}
 		}
 
 		public Collection<IContext> getContexts() {
@@ -105,6 +123,10 @@ public class Autocontext {
 		
 		public Collection<ActionFlow> getActionFlows() {
 			return mActionFlows;
+		}
+		
+		public Collection<ContextActionPair> getContextActions() {
+			return mContextActionPairs;
 		}
 	}
 	

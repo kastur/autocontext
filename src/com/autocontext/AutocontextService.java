@@ -1,6 +1,7 @@
 package com.autocontext;
 
 import com.autocontext.Autocontext.FlowManager;
+import com.autocontext.observers.ImmediateContextObserver;
 
 import android.app.Service;
 import android.content.Intent;
@@ -27,6 +28,8 @@ public class AutocontextService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		flowManager = new FlowManager();
+		flowManager.registerContextObserver(new ImmediateContextObserver());
+		flowManager.init(getApplicationContext());
 	}
 	
 	
