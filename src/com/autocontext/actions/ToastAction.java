@@ -39,6 +39,9 @@ public class ToastAction extends IAction {
 		editLayout.addView(editText);
 		
 		dispLayout = new LinearLayout(mAppContext);
+	    TextView dispLabel = new TextView(mAppContext);
+	    dispLabel.setText("Toast: ");
+	    dispLayout.addView(dispLabel);
 		final TextView dispView = new TextView(mAppContext);
 		dispView.setText(params.getString("toastText"));
 		dispLayout.addView(dispView);

@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.autocontext.Autocontext.ContextType;
 import com.autocontext.Autocontext.IContext;
+import com.autocontext.Autocontext.IContextObserver;
 
 public class GeofenceContext extends IContext {
 	Bundle params;
@@ -112,7 +113,7 @@ public class GeofenceContext extends IContext {
 
 	@Override
 	public ContextType getType() {
-		return ContextType.CONTEXT_IMMEDIATE;
+		return ContextType.CONTEXT_GEOFENCE;
 	}
 
 	@Override
@@ -123,6 +124,12 @@ public class GeofenceContext extends IContext {
 	@Override
 	public View getDispView() {
 		return dispLayout;
+	}
+
+	@Override
+	public void onAttached(IContextObserver observer) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -41,6 +41,11 @@ public class ImmediateContextObserver implements IContextObserver {
 			mContextReceiver.triggerContext(context, payload);
 		}
 	}
+
+	@Override
+	public void onContextUpdated(IContext context) {
+		registerContext(context);
+	}
 	
 
 }

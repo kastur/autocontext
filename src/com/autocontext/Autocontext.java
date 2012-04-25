@@ -18,6 +18,7 @@ public class Autocontext {
 	
 		CONTEXT_CALENDAR_EVENT,
 		CONTEXT_CALENDAR_EVENT_FILTER,
+		CONTEXT_GEOFENCE,
 		CONTEXT_IMMEDIATE,
 		CONTEXT_EVENT_DISPLAY_OFF,
 	};
@@ -55,6 +56,8 @@ public class Autocontext {
 		public abstract ContextType getType();
 		public abstract View getEditView();
 		public abstract View getDispView();
+		
+		public abstract void onAttached(IContextObserver observer);
 	}
 	
 	public static abstract class IAction {
@@ -82,5 +85,6 @@ public class Autocontext {
 		public abstract void init(Context context);
 		public abstract void registerCallback(IContextReceiver contextReceiver);
 		public abstract void registerContext(IContext context);
+		public abstract void onContextUpdated(IContext context);
 	}
 }

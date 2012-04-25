@@ -2,6 +2,7 @@ package com.autocontext;
 
 import com.autocontext.Autocontext.IContextObserver;
 import com.autocontext.FlowManager;
+import com.autocontext.observers.CalenderEventContextObserver;
 import com.autocontext.observers.ImmediateContextObserver;
 
 import android.app.Service;
@@ -30,6 +31,7 @@ public class AutocontextService extends Service {
 		super.onCreate();
 		flowManager = new FlowManager();
 		flowManager.registerContextObserver(new ImmediateContextObserver());
+		flowManager.registerContextObserver(new CalenderEventContextObserver());
 		flowManager.init(getApplicationContext());
 	}
 	

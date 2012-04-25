@@ -6,19 +6,25 @@ import com.autocontext.FlowManager;
 import com.autocontext.Autocontext.IAction;
 import com.autocontext.Autocontext.IContext;
 import com.autocontext.actions.ToastAction;
+import com.autocontext.contexts.CalendarEventContext;
 import com.autocontext.contexts.ImmediateContext;
+import com.autocontext.observers.CalenderEventContextObserver.CalendarEvent;
 
+import android.R.color;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 
@@ -49,44 +55,43 @@ public class AutocontextActivity extends Activity {
         layout = new LinearLayout(applicationContext);
         layout.setOrientation(LinearLayout.VERTICAL);
         
-        setContentView(layout);
+        ScrollView rootView = new ScrollView(applicationContext);
+        rootView.addView(layout);
+        
+        setContentView(rootView);
     }
     
     public void onConnect() {
     	Context appContext = getApplicationContext();
-    	ImmediateContext immediateContext = new ImmediateContext(appContext);
-    	mFlowManager.registerContext(immediateContext);
+    	//ImmediateContext immediateContext = new ImmediateContext(appContext);
+    	//mFlowManager.registerContext(immediateContext);
+    	
+    	
+    	CalendarEventContext calendarContext = new CalendarEventContext(appContext);
+    	mFlowManager.registerContext(calendarContext);
     	
     	ActionFlow actionFlow = new ActionFlow();
     	actionFlow.add(new ToastAction(appContext));
     	mFlowManager.registerActionFlow(actionFlow);
     	
-    	mFlowManager.registerContextAction(immediateContext, actionFlow);
+    	mFlowManager.registerContextAction(calendarContext, actionFlow);
     	draw();
     }
     
     public void draw() {
     	final Context applicationContext = getApplicationContext();
-        {
-        TextView textView = new TextView(applicationContext);
-        textView.setText("Configure contexts");
-        layout.addView(textView);
+    	
+        layout.addView(getHeadingOne(applicationContext, "Configured Contexts"));
         layout.addView(getContextsView(applicationContext));
-        }
+        layout.addView(getHorizSeparator(applicationContext));
         
-        {
-        TextView textView = new TextView(applicationContext);
-        textView.setText("Configure action flows");
-        layout.addView(textView);
+        layout.addView(getHeadingOne(applicationContext, "Configured Tasks"));
         layout.addView(getActionFlowsView(applicationContext));
-        }
+        layout.addView(getHorizSeparator(applicationContext));
         
-        {
-        TextView textView = new TextView(applicationContext);
-        textView.setText("Configure context <--> action flow mappings");
-        layout.addView(textView);
+        layout.addView(getHeadingOne(applicationContext, "Configured Scripts"));
         layout.addView(getContextActionView(applicationContext));
-        }
+        layout.addView(getHorizSeparator(applicationContext));
         
         Button triggerImmediateButton = new Button(applicationContext);
         triggerImmediateButton.setOnClickListener(new OnClickListener() {
@@ -109,6 +114,7 @@ public class AutocontextActivity extends Activity {
     
     private View getActionFlowsView(Context activityContext) {
     	LinearLayout layout = new LinearLayout(activityContext);
+    	layout.setOrientation(LinearLayout.VERTICAL);
     	
     	for (ActionFlow actionFlow : mFlowManager.getActionFlows()) {
     		for (IAction action : actionFlow) {
@@ -120,13 +126,53 @@ public class AutocontextActivity extends Activity {
     
     private View getContextActionView(Context activityContext) {
     	LinearLayout layout = new LinearLayout(activityContext);
+    	layout.setOrientation(LinearLayout.VERTICAL);
     	
     	for (ContextActionPair pair : mFlowManager.getContextActions()) {
-    		layout.addView(pair.getContext().getDispView());
+    		LinearLayout pairLayout = new LinearLayout(activityContext);
+    		layout.addView(pairLayout);
+    		
+    		pairLayout.addView(pair.getContext().getDispView());
+    		pairLayout.addView(getVerticalSeparator(activityContext));
+    		
+    		
+    		LinearLayout pairActions = new LinearLayout(activityContext);
+    		pairLayout.addView(pairActions);
+        	
     		for (IAction action : pair.getActions()) {
-    			layout.addView(action.getDispView());
+    			pairActions.addView(action.getDispView());
+    			pairActions.addView(getHorizSeparator(activityContext));
     		}
     	}
+    	return layout;
+    }
+    
+    private View getHorizSeparator(Context activityContext) {
+    	LinearLayout layout = new LinearLayout(activityContext);
+    	layout.setBackgroundColor(Color.parseColor("#ff0000"));
+    	layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, 1));
+    	return layout;
+    }
+    
+    private View getVerticalSeparator(Context activityContext) {
+    	LinearLayout layout = new LinearLayout(activityContext);
+    	layout.setBackgroundColor(Color.parseColor("#ff0000"));
+    	layout.setLayoutParams(new LayoutParams(1, LayoutParams.FILL_PARENT));
+    	layout.setPadding(10, 5, 5, 10);
+    	return layout;
+    }
+    
+    private View getHeadingOne(Context activityContext, String text) {
+    	LinearLayout layout = new LinearLayout(activityContext);
+    	layout.setPadding(0, 10, 0, 1);
+    	layout.setBackgroundColor(Color.parseColor("#333333"));
+    	//layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+    	
+    	TextView textView = new TextView(activityContext);
+    	
+    	textView.setTextColor(Color.parseColor("#ffffff"));
+    	textView.setText(text);
+    	layout.addView(textView);
     	return layout;
     }
     

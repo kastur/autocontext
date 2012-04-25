@@ -20,7 +20,7 @@ public class GeoFenceContextObserver implements IContextObserver {
 	
 	@Override
 	public ContextType getType() {
-		return ContextType.CONTEXT_IMMEDIATE;
+		return ContextType.CONTEXT_CALENDAR_EVENT;
 	}
 
 	@Override
@@ -70,6 +70,11 @@ public class GeoFenceContextObserver implements IContextObserver {
 		public void onStatusChanged(String arg0, int arg1, Bundle arg2) {	}
 		
 	};
+
+	@Override
+	public void onContextUpdated(IContext context) {
+		registerContext(context);
+	}
 	
 
 }
