@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 
 import com.autocontext.Autocontext.ActionFlow;
 import com.autocontext.Autocontext.ContextActionPair;
@@ -14,6 +15,8 @@ import com.autocontext.Autocontext.IAction;
 import com.autocontext.Autocontext.IContext;
 import com.autocontext.Autocontext.IContextObserver;
 import com.autocontext.Autocontext.IContextReceiver;
+import com.autocontext.contexts.CalendarEventContext;
+import com.autocontext.observers.CalenderEventContextObserver;
 import com.autocontext.observers.ImmediateContextObserver;
 
 public  class FlowManager implements IContextReceiver {
@@ -64,6 +67,12 @@ public  class FlowManager implements IContextReceiver {
 		immediateContextObserver.triggerContext();
 	}
 
+	public void triggerNextCalendarContext() {
+		CalenderEventContextObserver contextObserver = 
+		(CalenderEventContextObserver)mContextObservers.get(ContextType.CONTEXT_CALENDAR_EVENT);
+		contextObserver.triggerNextQueuedContext();
+	}
+	
 	public void triggerContext(IContext context, Bundle payload) {
 		for (ContextActionPair pair : mContextActionPairs) {
 			if (pair.getContext().equals(context)) {

@@ -23,7 +23,8 @@ public class ToastAction extends IAction {
 	
 	@Override
 	public void run(Bundle payload) {
-		Toast.makeText(mAppContext, params.getString("toastText"), Toast.LENGTH_SHORT).show();
+		String extraMessage = payload.getString("toastExtras", "No extras");
+		Toast.makeText(mAppContext, params.getString("toastText") + ": " + extraMessage, Toast.LENGTH_SHORT).show();
 	}
 	
 	@Override

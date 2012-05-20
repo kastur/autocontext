@@ -19,6 +19,8 @@ public class CalendarEventContext extends IContext {
 	Bundle params;
 	LinearLayout editLayout;
 	LinearLayout dispLayout;
+	TextView feedbackLabel;
+	
 	public CalendarEventContext(Context appContext) {
 		super(appContext);
 	}
@@ -48,6 +50,9 @@ public class CalendarEventContext extends IContext {
 		final TextView textView = new TextView(mAppContext);
 		textView.setText(params.getString("name_filter"));
 		dispLayout.addView(textView);
+		
+		feedbackLabel = new TextView(mAppContext);
+		editLayout.addView(feedbackLabel);
 		
 		
 		editText.addTextChangedListener(new TextWatcher() {
@@ -91,6 +96,10 @@ public class CalendarEventContext extends IContext {
 	@Override
 	public void onAttached(IContextObserver observer) {
 		mObserver = observer;
+	}
+	
+	public void setFeedbackText(String feedbackText) {
+		feedbackLabel.setText(feedbackText);
 	}
 
 }

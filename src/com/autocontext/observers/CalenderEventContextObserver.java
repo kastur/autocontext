@@ -1,10 +1,8 @@
 package com.autocontext.observers;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -21,8 +19,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.CalendarContract;
 import android.text.format.DateUtils;
-import android.widget.Toast;
 
 import com.autocontext.Autocontext.ContextType;
 import com.autocontext.Autocontext.IContext;
@@ -31,12 +29,28 @@ import com.autocontext.Autocontext.IContextReceiver;
 import com.autocontext.contexts.CalendarEventContext;
 
 public class CalenderEventContextObserver implements IContextObserver {
-	IContextReceiver mContextReceiver;
-	Context mContext;
+	public static final boolean kAndroidVersionGingerbread = false;
 	
-	HashSet<CalendarEventContext> mRegisteredContexts;
+	private IContextReceiver mContextReceiver;
+	private Context mContext;
+	private HashSet<CalendarEventContext> mRegisteredContexts;
+	private	PriorityQueue<CalendarInstanceTrigger> triggerQueue;
 	
-	PriorityQueue<CalendarEvent> calendarQueue;
+	public enum EventTriggerCondition {
+		ENTER_EVENT,
+		EXIT_EVENT
+	};
+
+	public class CalendarInstanceTrigger implements Comparable<CalendarInstanceTrigger> {
+		public EventTriggerCondition type;
+		public Date time;
+		public Integer event_id;
+		public String event_title;
+		public CalendarEventContext context;
+		public int compareTo(CalendarInstanceTrigger e) {
+			return this.time.compareTo(e.time);
+		}
+	};
 	
 	@Override
 	public ContextType getType() {
@@ -47,18 +61,8 @@ public class CalenderEventContextObserver implements IContextObserver {
 	public void init(Context appContext) {
 		mContext = appContext;
 		mRegisteredContexts = new HashSet<CalendarEventContext>();
-		calendarQueue = new PriorityQueue<CalenderEventContextObserver.CalendarEvent>();
-		
-		ContentResolver contentResolver = mContext.getContentResolver();
-		Uri calendarUri = Uri.parse("content://com.android.calendar/calendars");
-		contentResolver.registerContentObserver(
-				calendarUri, true, mCalendarChangeObserver);
-		
-		mContext.registerReceiver(mAlarmReceiver, new IntentFilter("ALARM"));
-		
-		init_events();
-		
-		
+		triggerQueue = new PriorityQueue<CalendarInstanceTrigger>();
+		initializeCalendarEventsContentObserver();	
 	}
 
 	@Override
@@ -72,187 +76,162 @@ public class CalenderEventContextObserver implements IContextObserver {
 		context.onAttached(this);
 	}
 	
-	public void triggerContext() {
-		Bundle payload = new Bundle();
-		payload.putLong(ContextType.CONTEXT_IMMEDIATE.name() + "_timestamp", System.currentTimeMillis());
-		for (IContext context : mRegisteredContexts) {
-			mContextReceiver.triggerContext(context, payload);
+	@Override
+	public void onContextUpdated(IContext context) {
+		ResetAndPopulateCalendarQueue();
+		
+		ContentResolver resolver = mContext.getContentResolver();
+		final CalendarEventContext calendarEventContext = (CalendarEventContext)context;
+		List<CalendarInstanceTrigger> contextInstances = getInstancesThisWeek(resolver, calendarEventContext);
+		
+		int numMatches = contextInstances.size();
+		
+		if (numMatches > 0) {
+			String exampleMatch = contextInstances.get(0).event_title;
+			calendarEventContext.setFeedbackText(exampleMatch+ ", and " + (numMatches - 1) + " others.");
+		} else {
+			calendarEventContext.setFeedbackText("No matches");
 		}
 	}
 	
-	Handler mHandler = new Handler();
+	public void triggerNextQueuedContext() {
+		if (triggerQueue.size() > 0)
+			runContexts(triggerQueue.peek().time);
+	}
 	
-	ContentObserver mCalendarChangeObserver = new ContentObserver(mHandler) {
+	private void initializeCalendarEventsContentObserver() {
+		ContentResolver contentResolver = mContext.getContentResolver();
+		Uri calendarEventsUri;
+		if (kAndroidVersionGingerbread) {
+			calendarEventsUri = Uri.parse("content://com.android.calendar/calendars");
+		} else {
+			calendarEventsUri = CalendarContract.Events.CONTENT_URI;
+		}
+		contentResolver.registerContentObserver(
+				calendarEventsUri,
+				true /* notify descendants */,
+				mCalendarChangeObserver);
+		mContext.registerReceiver(mAlarmReceiver, new IntentFilter("ALARM"));
+	}
+	
+	private Handler mHandler = new Handler();
+	
+	private ContentObserver mCalendarChangeObserver = new ContentObserver(mHandler) {
 		@Override
 		public void onChange(boolean selfChange) {
 			super.onChange(selfChange);
-			init_events();
+			ResetAndPopulateCalendarQueue();
 		}
 	};
 	
-	private void init_events() {
+	private void ResetAndPopulateCalendarQueue() {
 		ContentResolver contentResolver = mContext.getContentResolver();
-		HashMap<String, String> calendarsMap = getCalendars(mContext);
-		
-		
-		List<CalendarEvent> calendarEvents = getMockEventsList(mContext);
-		for (CalendarEvent e : calendarEvents) {
-			calendarQueue.add(e);
+
+		triggerQueue = new PriorityQueue<CalendarInstanceTrigger>();
+		for (CalendarEventContext registeredContext : mRegisteredContexts) {
+			List<CalendarInstanceTrigger> triggers = 
+					getInstancesThisWeek(contentResolver, registeredContext);
+			for (CalendarInstanceTrigger trigger : triggers) {
+				triggerQueue.add(trigger);
+			}
 		}
 		
-		set_alarm(calendarQueue.peek());
+		WakeUpNextOn(triggerQueue.peek());
 	}
 	
-	private void set_alarm(CalendarEvent calendarEvent) {
+	private void WakeUpNextOn(CalendarInstanceTrigger calendarEvent) {
+		if (calendarEvent == null)
+			return;
+		
 		PendingIntent sender = PendingIntent.getBroadcast(mContext, 0, new Intent("ALARM"), PendingIntent.FLAG_CANCEL_CURRENT);
-        long upcomingEventTime = calendarQueue.peek().begin.getTime();
+        long instanceBeginTime = calendarEvent.time.getTime();
 
-        // Schedule the alarm!
         AlarmManager alarmMan = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
-        alarmMan.set(AlarmManager.RTC_WAKEUP, upcomingEventTime, sender);
+        alarmMan.set(AlarmManager.RTC_WAKEUP, instanceBeginTime, sender);
 	}
 	
 	
 	private BroadcastReceiver mAlarmReceiver = new BroadcastReceiver() {
 		@Override
-		public void onReceive(Context context, Intent intent) {			
-			CalendarEvent contextEvent = calendarQueue.poll();
-			for (CalendarEventContext calendarContext : mRegisteredContexts) {
-				final String filterText = calendarContext.getFilterText();
-				if (filterText == null)
-					continue;
-				
-				if (contextEvent.title.matches(".*"+filterText+".*")) {
-					Bundle payload = new Bundle();
-					payload.putString("calendar_event_title", contextEvent.title);
-					mContextReceiver.triggerContext(calendarContext, payload);
-				}
-			}
+		public void onReceive(Context context, Intent intent) {
+			runContexts(new Date());
 			
-			set_alarm(calendarQueue.peek());
+			// Set up next alarm.
+			WakeUpNextOn(triggerQueue.peek());
 		}
 	};
 	
-	public static HashMap<String, String> getCalendars(Context context) {
-		ContentResolver contentResolver = context.getContentResolver();
-
-		final Cursor cursor = contentResolver.query(
-				Uri.parse("content://com.android.calendar/calendars"),
-				new String[] { "_id", "displayName", "selected" },
-				null, null, null);
-		HashMap<String, String> calendarsMap = new HashMap<String, String>();
-		while (cursor.moveToNext()) {
-			final String _id = cursor.getString(0);
-			final String _displayName = cursor.getString(1);
-			final Boolean _selected = !cursor.getString(2).equals("0");
-			calendarsMap.put(_id, _displayName);
-		}
-		return calendarsMap;
-	}
-	
-	public static class CalendarEvent implements Comparable<CalendarEvent> {
-		public Integer id;
-		public String title;
-		public Date begin;
-		public Date end;
-		public Boolean allDay;
-		public int compareTo(CalendarEvent e) {
-			return this.begin.compareTo(e.begin);
+	private void runContexts(Date now) {
+		while (true) {
+			// Peek at the first in the queue to see if it's occurred.
+			CalendarInstanceTrigger triggerEvent = triggerQueue.peek();
+			if (triggerEvent.time.getTime() > now.getTime())
+				break;
+			// Remove the event.
+			triggerQueue.poll();
+			
+			// Let the context receiver know about the event.
+			Bundle payload = new Bundle();
+			payload.putString("toastExtras", triggerEvent.type.toString() + ": " + triggerEvent.event_title);
+			mContextReceiver.triggerContext(triggerEvent.context, payload);
 		}
 	}
 	
-	public static List<CalendarEvent> getEventsList(Context context) {
-		Uri.Builder builder = Uri.parse("content://com.android.calendar/instances/when").buildUpon();
+	public List<CalendarInstanceTrigger> getInstancesThisWeek(ContentResolver resolver, CalendarEventContext searchContext) {
+		final String searchTitle = searchContext.getFilterText();
+		
+		Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
 		long now = new Date().getTime();
 		ContentUris.appendId(builder, now);
 		ContentUris.appendId(builder, now + DateUtils.WEEK_IN_MILLIS);
-	
-		ContentResolver contentResolver = context.getContentResolver();
-		Cursor eventCursor = contentResolver.query(
+		
+		String[] projection = {
+				CalendarContract.Instances.EVENT_ID,
+				CalendarContract.Instances.TITLE,
+				CalendarContract.Instances.BEGIN,
+				CalendarContract.Instances.END,
+				CalendarContract.Instances.ALL_DAY,
+		};
+		
+		
+		final Cursor instanceCursor = resolver.query(
 				builder.build(),
-				new String[] { "event_id", "title", "begin", "end", "allDay"},
-				"" /* WHERE Clause */,
-				null,
-				"startDay ASC, startMinute ASC");
-	
-		ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent> ();
-		while (eventCursor.moveToNext()) {
-			final Integer id = eventCursor.getInt(0);
-			final String title = eventCursor.getString(1);
-			final Date begin = new Date(eventCursor.getLong(2));
-			final Date end = new Date(eventCursor.getLong(3));
-			final Boolean allDay = !eventCursor.getString(4).equals("0");
-			CalendarEvent event = new CalendarEvent();
-			event.id = id;
-			event.title = title;
-			event.begin = begin;
-			event.end = end;
-			event.allDay = allDay;
-			events.add(event);
-		}
-		return events;
-	}
-	
-	public static List<CalendarEvent> getMockEventsList(Context context) {
-		ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent> ();
-
-		Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-       
-		for (int ii = 0; ii < 100; ++ii) {
-			CalendarEvent testEvent = new CalendarEvent();
-			testEvent.title = "TEST";
-	        calendar.add(Calendar.SECOND, 5);
-	        testEvent.begin = calendar.getTime();
-	        calendar.add(Calendar.SECOND, 5);
-			testEvent.end = calendar.getTime();
-			testEvent.allDay = false;
-			events.add(testEvent);
-		}
+				projection,
+				CalendarContract.Instances.TITLE + " LIKE ?",
+				new String[] { searchTitle },
+				null);
 		
-		return events;
-	}
-	
-	public static List<CalendarEvent> getEventsList(Context context, int calendarId, String filterText) {
-		Uri.Builder builder = Uri.parse("content://com.android.calendar/instances/when").buildUpon();
-		long now = new Date().getTime();
-		ContentUris.appendId(builder, now);
-		ContentUris.appendId(builder, now + DateUtils.WEEK_IN_MILLIS);
-	
-		ContentResolver contentResolver = context.getContentResolver();
-		Cursor eventCursor = contentResolver.query(
-				builder.build(),
-				new String[] { "event_id", "title", "begin", "end", "allDay"},
-				"Calendars._id=" + calendarId,
-				null,
-				"startDay ASC, startMinute ASC");
-	
-		ArrayList<CalendarEvent> events = new ArrayList<CalendarEvent> ();
+		LinkedList<CalendarInstanceTrigger> triggers = new LinkedList<CalendarInstanceTrigger>();
 		
-		// Add test event always;
-
-		
-		while (eventCursor.moveToNext()) {
-			final Integer id = eventCursor.getInt(0);
-			final String title = eventCursor.getString(1);
-			final Date begin = new Date(eventCursor.getLong(2));
-			final Date end = new Date(eventCursor.getLong(3));
-			final Boolean allDay = !eventCursor.getString(4).equals("0");
-			if (title.contains(filterText)) {
-				CalendarEvent event = new CalendarEvent();
-				event.id = id;
-				event.title = title;
-				event.begin = begin;
-				event.end = end;
-				event.allDay = allDay;
-				events.add(event);
+		while (instanceCursor.moveToNext()) {
+			final Integer id = instanceCursor.getInt(0);
+			final String title = instanceCursor.getString(1);
+			final Date begin_date = new Date(instanceCursor.getLong(2));
+			final Date end_date = new Date(instanceCursor.getLong(3));
+			final Boolean allDay = !instanceCursor.getString(4).equals("0");
+			
+			{
+				CalendarInstanceTrigger enterTrigger = new CalendarInstanceTrigger();
+				enterTrigger.type = EventTriggerCondition.ENTER_EVENT;
+				enterTrigger.time  = begin_date;
+				enterTrigger.context = searchContext;
+				enterTrigger.event_id = id;
+				enterTrigger.event_title = title;
+				triggers.add(enterTrigger);
+			}
+			
+			{
+				CalendarInstanceTrigger exitTrigger = new CalendarInstanceTrigger();
+				exitTrigger.type = EventTriggerCondition.EXIT_EVENT;
+				exitTrigger.time  = end_date;
+				exitTrigger.context = searchContext;
+				exitTrigger.event_id = id;
+				exitTrigger.event_title = title;
+				triggers.add(exitTrigger);
 			}
 		}
-		return events;
+		return triggers;
 	}
-
-	@Override
-	public void onContextUpdated(IContext context) {
-		Toast.makeText(mContext, "Updated context", Toast.LENGTH_SHORT).show();
-	}
+	
+	
 }

@@ -7,10 +7,6 @@ import com.autocontext.Autocontext.IAction;
 import com.autocontext.Autocontext.IContext;
 import com.autocontext.actions.ToastAction;
 import com.autocontext.contexts.CalendarEventContext;
-import com.autocontext.contexts.ImmediateContext;
-import com.autocontext.observers.CalenderEventContextObserver.CalendarEvent;
-
-import android.R.color;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -102,7 +98,17 @@ public class AutocontextActivity extends Activity {
 		});
         triggerImmediateButton.setText("Trigger immediate contexts.");
         layout.addView(triggerImmediateButton);
-    }
+
+    
+        Button triggerNextCalendarButton = new Button(applicationContext);
+        triggerNextCalendarButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mFlowManager.triggerNextCalendarContext();
+			}
+		});
+        triggerNextCalendarButton.setText("Trigger next calendar context.");
+        layout.addView(triggerNextCalendarButton);}
     
     private View getContextsView(Context activityContext) {
     	LinearLayout layout = new LinearLayout(activityContext);
