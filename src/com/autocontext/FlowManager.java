@@ -3,9 +3,16 @@ package com.autocontext;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
 
 import com.autocontext.Autocontext.ActionFlow;
@@ -27,6 +34,7 @@ public  class FlowManager implements IContextReceiver {
 	HashSet<ContextActionPair> mContextActionPairs;
 	
 	Context mApplicationContext;
+	SharedPreferences mPrefs;
 	
 	public FlowManager() {
 		mContextObservers = new HashMap<Autocontext.ContextType, Autocontext.IContextObserver>();
@@ -37,9 +45,35 @@ public  class FlowManager implements IContextReceiver {
 	
 	public void init(Context context) {
 		mApplicationContext = context.getApplicationContext();
+		
 		for (IContextObserver observer : mContextObservers.values()) {
 			observer.init(context);
 		}
+
+		
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		Map<String, ?> allPrefs = mPrefs.getAll();
+		for (Object value : allPrefs.values()) {
+			final String data = (String)value;
+			AddContextActionFromString(data);
+		}		
+	}
+	
+	public void AddContextActionFromString(String json) {
+		try {
+			JSONArray json_params = new JSONArray(json);
+			for (int ii = 0; ii < json_params.length(); ++ii) {
+				JSONObject json_param = json_params.getJSONObject(ii);
+				final ContextType contextType = ContextType.valueOf(json_param.getString("ContextType"));
+				switch (contextType) {
+					case CONTEXT_CALENDAR_EVENT: 
+				}
+			}
+			for (JSONObject json_param : json_params.notify())
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void registerContextObserver(IContextObserver contextObserver) {
