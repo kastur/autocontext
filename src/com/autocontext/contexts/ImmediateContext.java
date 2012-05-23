@@ -2,74 +2,42 @@ package com.autocontext.contexts;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.autocontext.ContextCond;
+import com.autocontext.ContextSensor;
+import com.autocontext.ContextSpecKind;
 
-import com.autocontext.Autocontext.ContextType;
-import com.autocontext.Autocontext.IContext;
-import com.autocontext.Autocontext.IContextObserver;
-
-public class ImmediateContext extends IContext {
+public class ImmediateContext extends ContextCond {
 	Bundle params;
 	LinearLayout editLayout;
-	LinearLayout dispLayout;
-	public ImmediateContext(Context appContext) {
-		super(appContext);
-	}
-	
-	@Override
-	public void onCreate(Bundle savedState) {
-		params = savedState;
-		editLayout = new LinearLayout(mAppContext);
-		EditText editText = new EditText(mAppContext);
-		editText.setText(params.getString("name"));
-		editLayout.addView(editText);
-		
-		
-		dispLayout = new LinearLayout(mAppContext);
-		final TextView textView = new TextView(mAppContext);
-		textView.setText(params.getString("name"));
-		dispLayout.addView(textView);
-		
-		
-		editText.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				textView.setText(s);
-			}
-			
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-			
-			@Override
-			public void afterTextChanged(Editable s) {
-				params.putString("name", s.toString());
-			}
-		});
+
+	public ImmediateContext(Bundle savedState) {
+		super(savedState);
 	}
 
 	@Override
-	public ContextType getType() {
-		return ContextType.CONTEXT_IMMEDIATE;
+	public ContextSpecKind getType() {
+		return ContextSpecKind.CONTEXT_IMMEDIATE;
 	}
 
 	@Override
-	public View getEditView() {
-
-		return editLayout;
-	}
-	
-	@Override
-	public View getDispView() {
-		return dispLayout;
+	public View createView(Context appContext) {
+        editLayout = new LinearLayout(appContext);
+        TextView textView = new TextView(appContext);
+        textView.setText("IMMEDIATE");
+        editLayout.addView(textView);
+        return editLayout;
 	}
 
+    @Override
+    public void destroyView() {
+
+    }
+
 	@Override
-	public void onAttached(IContextObserver observer) {
+	public void onAttached(ContextSensor sensor) {
 		// TODO Auto-generated method stub
 		
 	}

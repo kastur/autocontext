@@ -9,69 +9,55 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.autocontext.Reaction;
+import com.autocontext.SensedContext;
 
-import com.autocontext.Autocontext.IAction;
-
-public class ToastAction extends IAction {
-	public ToastAction(Context context) {
-		super(context);
-	}
-
+public class ToastAction extends Reaction {
 	Bundle params;
 	LinearLayout editLayout;
-	LinearLayout dispLayout;
+
+    public ToastAction(Bundle savedState) {
+        super(savedState);
+    }
 	
 	@Override
-	public void run(Bundle payload) {
+	public void run(Context appContext, SensedContext event, Bundle payload) {
 		String extraMessage = payload.getString("toastExtras", "No extras");
-		Toast.makeText(mAppContext, params.getString("toastText") + ": " + extraMessage, Toast.LENGTH_SHORT).show();
+		Toast.makeText(appContext, params.getString("toastText") + ": " + extraMessage, Toast.LENGTH_SHORT).show();
 	}
 	
 	@Override
 	public void onCreate(Bundle savedState) {
 		params = savedState;
-		
-		editLayout = new LinearLayout(mAppContext);
-		TextView textView = new TextView(mAppContext);
-		textView.setText("Message: ");
-		editLayout.addView(textView);
-		final EditText editText = new EditText(mAppContext);
-		editText.setText(params.getString("toastText"));
-		editLayout.addView(editText);
-		
-		dispLayout = new LinearLayout(mAppContext);
-	    TextView dispLabel = new TextView(mAppContext);
-	    dispLabel.setText("Toast: ");
-	    dispLayout.addView(dispLabel);
-		final TextView dispView = new TextView(mAppContext);
-		dispView.setText(params.getString("toastText"));
-		dispLayout.addView(dispView);
-		
-		editText.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				dispView.setText(s);
-			}
-			
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-			
-			@Override
-			public void afterTextChanged(Editable s) {
-				params.putString("toastText", s.toString());
-			}
-		});
-		
-		
 	}
 	
 	@Override
-	public View getEditView() {
-		return editLayout;
+	public View getView(Context appContext) {
+        editLayout = new LinearLayout(appContext);
+        TextView textView = new TextView(appContext);
+        textView.setText("Message: ");
+        editLayout.addView(textView);
+        final EditText editText = new EditText(appContext);
+        editText.setText(params.getString("toastText"));
+        editLayout.addView(editText);
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                params.putString("toastText", s.toString());
+            }
+        });
+        return editLayout;
 	}
 
-	@Override
-	public View getDispView() {
-		return dispLayout;
-	}
+    @Override
+    public void destroyView() {
+
+    }
 }

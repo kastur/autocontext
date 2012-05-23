@@ -1,19 +1,8 @@
 package com.autocontext.observers;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.PriorityQueue;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -21,44 +10,35 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.CalendarContract;
 import android.text.format.DateUtils;
-
-import com.autocontext.Autocontext.ContextType;
-import com.autocontext.Autocontext.IContext;
-import com.autocontext.Autocontext.IContextObserver;
-import com.autocontext.Autocontext.IContextReceiver;
+import com.autocontext.*;
 import com.autocontext.contexts.CalendarEventContext;
 
-public class CalenderEventContextObserver implements IContextObserver {
+import java.util.*;
+
+public class CalenderEventContextSensor extends ContextSensor {
 	public static final boolean kAndroidVersionGingerbread = false;
-	
-	private IContextReceiver mContextReceiver;
 	private Context mContext;
 	private HashSet<CalendarEventContext> mRegisteredContexts;
 	private	PriorityQueue<CalendarInstanceTrigger> triggerQueue;
-	
-	public enum EventTriggerCondition {
-		ENTER_EVENT,
-		EXIT_EVENT
-	};
 
-	public class CalendarInstanceTrigger implements Comparable<CalendarInstanceTrigger> {
-		public EventTriggerCondition type;
+	public class CalendarInstanceTrigger extends SensedContext implements Comparable<CalendarInstanceTrigger> {
 		public Date time;
 		public Integer event_id;
 		public String event_title;
 		public CalendarEventContext context;
+
 		public int compareTo(CalendarInstanceTrigger e) {
 			return this.time.compareTo(e.time);
 		}
-	};
-	
-	@Override
-	public ContextType getType() {
-		return ContextType.CONTEXT_CALENDAR_EVENT;
+	}
+
+    @Override
+	public ContextSpecKind getKind() {
+		return ContextSpecKind.CONTEXT_CALENDAR_EVENT;
 	}
 
 	@Override
-	public void init(Context appContext) {
+	public void onCreate(Context appContext) {
 		mContext = appContext;
 		mRegisteredContexts = new HashSet<CalendarEventContext>();
 		triggerQueue = new PriorityQueue<CalendarInstanceTrigger>();
@@ -66,33 +46,30 @@ public class CalenderEventContextObserver implements IContextObserver {
 	}
 
 	@Override
-	public void registerCallback(IContextReceiver contextReceiver) {
-		mContextReceiver = contextReceiver;
-	}
-
-	@Override
-	public void registerContext(IContext context) {
+	public void addCond(ContextCond context) {
 		mRegisteredContexts.add((CalendarEventContext)context);
 		context.onAttached(this);
+
+        ResetAndPopulateCalendarQueue();
+
+        ContentResolver resolver = mContext.getContentResolver();
+        final CalendarEventContext calendarEventContext = (CalendarEventContext)context;
+        List<CalendarInstanceTrigger> contextInstances = getInstancesThisWeek(resolver, calendarEventContext);
+
+        int numMatches = contextInstances.size();
+
+        if (numMatches > 0) {
+            String exampleMatch = contextInstances.get(0).event_title;
+            calendarEventContext.setFeedbackText(exampleMatch+ ", and " + (numMatches - 1) + " others.");
+        } else {
+            calendarEventContext.setFeedbackText("No matches");
+        }
 	}
-	
-	@Override
-	public void onContextUpdated(IContext context) {
-		ResetAndPopulateCalendarQueue();
-		
-		ContentResolver resolver = mContext.getContentResolver();
-		final CalendarEventContext calendarEventContext = (CalendarEventContext)context;
-		List<CalendarInstanceTrigger> contextInstances = getInstancesThisWeek(resolver, calendarEventContext);
-		
-		int numMatches = contextInstances.size();
-		
-		if (numMatches > 0) {
-			String exampleMatch = contextInstances.get(0).event_title;
-			calendarEventContext.setFeedbackText(exampleMatch+ ", and " + (numMatches - 1) + " others.");
-		} else {
-			calendarEventContext.setFeedbackText("No matches");
-		}
-	}
+
+    @Override
+    public void removeCond(ContextCond context) {
+        mRegisteredContexts.remove(context);
+    }
 	
 	public void triggerNextQueuedContext() {
 		if (triggerQueue.size() > 0)
@@ -164,16 +141,17 @@ public class CalenderEventContextObserver implements IContextObserver {
 	private void runContexts(Date now) {
 		while (true) {
 			// Peek at the first in the queue to see if it's occurred.
-			CalendarInstanceTrigger triggerEvent = triggerQueue.peek();
-			if (triggerEvent.time.getTime() > now.getTime())
+			CalendarInstanceTrigger contextEvent = triggerQueue.peek();
+			if (contextEvent.time.getTime() > now.getTime())
 				break;
 			// Remove the event.
 			triggerQueue.poll();
 			
 			// Let the context receiver know about the event.
 			Bundle payload = new Bundle();
-			payload.putString("toastExtras", triggerEvent.type.toString() + ": " + triggerEvent.event_title);
-			mContextReceiver.triggerContext(triggerEvent.context, payload);
+			payload.putString("toastExtras", contextEvent.kind.toString() + ": " + contextEvent.event_title);
+
+			mManager.triggerContext(contextEvent.context, contextEvent, payload);
 		}
 	}
 	
@@ -211,23 +189,25 @@ public class CalenderEventContextObserver implements IContextObserver {
 			final Boolean allDay = !instanceCursor.getString(4).equals("0");
 			
 			{
-				CalendarInstanceTrigger enterTrigger = new CalendarInstanceTrigger();
-				enterTrigger.type = EventTriggerCondition.ENTER_EVENT;
-				enterTrigger.time  = begin_date;
-				enterTrigger.context = searchContext;
-				enterTrigger.event_id = id;
-				enterTrigger.event_title = title;
-				triggers.add(enterTrigger);
+				CalendarInstanceTrigger contextEvent = new CalendarInstanceTrigger();
+                contextEvent.kind = SensedContextKind.ENTER_EVENT;
+                contextEvent.id = "CALENDAR_EVENT" + id;
+                contextEvent.time  = begin_date;
+                contextEvent.context = searchContext;
+                contextEvent.event_id = id;
+                contextEvent.event_title = title;
+				triggers.add(contextEvent);
 			}
 			
 			{
-				CalendarInstanceTrigger exitTrigger = new CalendarInstanceTrigger();
-				exitTrigger.type = EventTriggerCondition.EXIT_EVENT;
-				exitTrigger.time  = end_date;
-				exitTrigger.context = searchContext;
-				exitTrigger.event_id = id;
-				exitTrigger.event_title = title;
-				triggers.add(exitTrigger);
+				CalendarInstanceTrigger contextEvent = new CalendarInstanceTrigger();
+                contextEvent.kind = SensedContextKind.EXIT_EVENT;
+                contextEvent.id = "CALENDAR_EVENT" + id;
+                contextEvent.time  = end_date;
+                contextEvent.context = searchContext;
+                contextEvent.event_id = id;
+                contextEvent.event_title = title;
+				triggers.add(contextEvent);
 			}
 		}
 		return triggers;

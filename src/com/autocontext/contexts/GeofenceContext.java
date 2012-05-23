@@ -7,19 +7,16 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
+import com.autocontext.ContextCond;
+import com.autocontext.ContextSensor;
+import com.autocontext.ContextSpecKind;
 
-import com.autocontext.Autocontext.ContextType;
-import com.autocontext.Autocontext.IContext;
-import com.autocontext.Autocontext.IContextObserver;
-
-public class GeofenceContext extends IContext {
+public class GeofenceContext extends ContextCond {
 	Bundle params;
 	LinearLayout editLayout;
-	LinearLayout dispLayout;
 	
-	public GeofenceContext(Context appContext) {
-		super(appContext);
+	public GeofenceContext(Bundle savedState) {
+        super(savedState);
 	}
 	
 	public double getLatitude() {
@@ -35,41 +32,24 @@ public class GeofenceContext extends IContext {
 	}
 	
 	@Override
-	public void onCreate(Bundle savedState) {
-		params = savedState;
-		editLayout = new LinearLayout(mAppContext);
-		
-		EditText latText = new EditText(mAppContext);
-		latText.setText(new Double(params.getDouble("lat")).toString());
-		editLayout.addView(latText);
-		
-		EditText lonText = new EditText(mAppContext);
-		lonText.setText(new Double(params.getDouble("lon")).toString());
-		editLayout.addView(lonText);
-		
-		EditText radText = new EditText(mAppContext);
-		radText.setText(new Double(params.getDouble("rad")).toString());
-		editLayout.addView(radText);
-		
-		
-		dispLayout = new LinearLayout(mAppContext);
-		final TextView latDispText = new TextView(mAppContext);
-		latDispText.setText(new Double(params.getDouble("lat")).toString());
-		dispLayout.addView(latDispText);
-		
-		final TextView lonDispText = new TextView(mAppContext);
-		lonDispText.setText(new Double(params.getDouble("lon")).toString());
-		dispLayout.addView(lonDispText);
-		
-		final TextView radDispText = new TextView(mAppContext);
-		radDispText.setText(new Double(params.getDouble("rad")).toString());
-		dispLayout.addView(radDispText);
-		
+	public View createView(Context appContext) {
+        editLayout = new LinearLayout(appContext);
+
+        EditText latText = new EditText(appContext);
+        latText.setText(new Double(params.getDouble("lat")).toString());
+        editLayout.addView(latText);
+
+        EditText lonText = new EditText(appContext);
+        lonText.setText(new Double(params.getDouble("lon")).toString());
+        editLayout.addView(lonText);
+
+        EditText radText = new EditText(appContext);
+        radText.setText(new Double(params.getDouble("rad")).toString());
+        editLayout.addView(radText);
+
 		latText.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				latDispText.setText(s);
-			}
+			public void onTextChanged(CharSequence s, int start, int before, int count) { }
 			
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -82,9 +62,7 @@ public class GeofenceContext extends IContext {
 		
 		lonText.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				lonDispText.setText(s);
-			}
+			public void onTextChanged(CharSequence s, int start, int before, int count) { }
 			
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -97,9 +75,7 @@ public class GeofenceContext extends IContext {
 		
 		radText.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				radDispText.setText(s);
-			}
+			public void onTextChanged(CharSequence s, int start, int before, int count) { }
 			
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -109,25 +85,21 @@ public class GeofenceContext extends IContext {
 				params.putDouble("rad", Double.parseDouble(s.toString()));
 			}
 		});
+        return editLayout;
+	}
+
+    @Override
+    public void destroyView() {
+
+    }
+
+	@Override
+	public ContextSpecKind getType() {
+		return ContextSpecKind.CONTEXT_GEOFENCE;
 	}
 
 	@Override
-	public ContextType getType() {
-		return ContextType.CONTEXT_GEOFENCE;
-	}
-
-	@Override
-	public View getEditView() {
-		return editLayout;
-	}
-	
-	@Override
-	public View getDispView() {
-		return dispLayout;
-	}
-
-	@Override
-	public void onAttached(IContextObserver observer) {
+	public void onAttached(ContextSensor sensor) {
 		// TODO Auto-generated method stub
 		
 	}

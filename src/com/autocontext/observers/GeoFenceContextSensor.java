@@ -1,50 +1,54 @@
 package com.autocontext.observers;
 
-import java.util.HashSet;
-
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-
-import com.autocontext.Autocontext.ContextType;
-import com.autocontext.Autocontext.IContext;
-import com.autocontext.Autocontext.IContextObserver;
-import com.autocontext.Autocontext.IContextReceiver;
+import com.autocontext.ContextCond;
+import com.autocontext.ContextSensor;
+import com.autocontext.ContextSpecKind;
+import com.autocontext.FlowManager;
 import com.autocontext.contexts.GeofenceContext;
 
-public class GeoFenceContextObserver implements IContextObserver {
-	IContextReceiver mContextReceiver;
+import java.util.HashSet;
+
+public class GeoFenceContextSensor extends ContextSensor {
+	FlowManager mFlowManager;
 	HashSet<GeofenceContext> mRegisteredContexts;
 	
 	@Override
-	public ContextType getType() {
-		return ContextType.CONTEXT_CALENDAR_EVENT;
+	public ContextSpecKind getKind() {
+		return ContextSpecKind.CONTEXT_CALENDAR_EVENT;
 	}
 
 	@Override
-	public void init(Context appContext) {
+	public void onCreate(Context appContext) {
 		mRegisteredContexts = new HashSet<GeofenceContext>();
 		LocationManager locationManager = (LocationManager)appContext.getSystemService(Context.LOCATION_SERVICE);
 		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mListener);
 	}
 
 	@Override
-	public void registerCallback(IContextReceiver contextReceiver) {
-		mContextReceiver = contextReceiver;
+	public void registerManager(FlowManager manager) {
+		mFlowManager = manager;
 	}
 
 	@Override
-	public void registerContext(IContext context) {
-		mRegisteredContexts.add((GeofenceContext)context);
+	public void addCond(ContextCond contextCond) {
+		mRegisteredContexts.add((GeofenceContext) contextCond);
 	}
+
+    @Override
+    public void removeCond(ContextCond contextCond) {
+        mRegisteredContexts.remove(contextCond);
+    }
 	
 	public void triggerContext() {
 		Bundle payload = new Bundle();
-		payload.putLong(ContextType.CONTEXT_IMMEDIATE.name() + "_timestamp", System.currentTimeMillis());
-		for (IContext context : mRegisteredContexts) {
-			mContextReceiver.triggerContext(context, payload);
+		payload.putLong(ContextSpecKind.CONTEXT_IMMEDIATE.name() + "_timestamp", System.currentTimeMillis());
+		for (ContextCond context : mRegisteredContexts) {
+			mFlowManager.triggerContext(context, null, payload);
 		}
 	}
 	
@@ -55,7 +59,7 @@ public class GeoFenceContextObserver implements IContextObserver {
 			for (GeofenceContext geoContext : mRegisteredContexts) {
 				if (Math.abs(location.getLongitude() - geoContext.getLongitude()) < geoContext.getRadius() &&
 					Math.abs(location.getLatitude() - geoContext.getLatitude()) < geoContext.getRadius()) {
-					mContextReceiver.triggerContext(geoContext, new Bundle());
+					mFlowManager.triggerContext(geoContext, null, new Bundle());
 				}
 			}
 		}
@@ -70,11 +74,4 @@ public class GeoFenceContextObserver implements IContextObserver {
 		public void onStatusChanged(String arg0, int arg1, Bundle arg2) {	}
 		
 	};
-
-	@Override
-	public void onContextUpdated(IContext context) {
-		registerContext(context);
-	}
-	
-
 }
