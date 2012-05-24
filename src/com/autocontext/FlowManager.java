@@ -4,8 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import com.autocontext.actions.SuppressGPSAction;
+import com.autocontext.contexts.CalendarEventContext;
 import com.autocontext.observers.CalenderEventContextSensor;
-import com.autocontext.observers.ImmediateContextSensor;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,19 +15,16 @@ import java.util.*;
 
 public  class FlowManager {
 	HashMap<ContextSpecKind, ContextSensor> mContextObservers;
-	HashMap<ContextSpecKind, ContextCond> mContexts;
-	HashSet<ReactionsList> mReactionsLists;
-	
-	ArrayList<Flow> mFlows;
-	
+    HashSet<Flow> mFlows;
+    HashMap<ContextSpec, Flow> mFlowsByContext;
+
 	Context mApplicationContext;
 	SharedPreferences mPrefs;
 	
 	public FlowManager() {
 		mContextObservers = new HashMap<ContextSpecKind, ContextSensor>();
-		mContexts = new HashMap<ContextSpecKind, ContextCond>();
-		mReactionsLists = new HashSet<ReactionsList>();
-		mFlows = new ArrayList<Flow>();
+		mFlowsByContext = new HashMap<ContextSpec, Flow>();
+		mFlows = new HashSet<Flow>();
 	}
 	
 	public void init(Context context) {
@@ -39,59 +37,86 @@ public  class FlowManager {
 		
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 		Map<String, ?> allPrefs = mPrefs.getAll();
-		for (Object value : allPrefs.values()) {
-			final String data = (String)value;
-			AddContextActionFromString(data);
+		for (Object dataObj : allPrefs.values()) {
+			final String dataStr = (String)dataObj;
+			AddContextActionFromString(dataStr);
 		}		
 	}
 	
-	public void AddContextActionFromString(String json) {
+	public void AddContextActionFromString(String savedJson) {
 		try {
-			JSONArray json_params = new JSONArray(json);
-			for (int ii = 0; ii < json_params.length(); ++ii) {
-				JSONObject json_param = json_params.getJSONObject(ii);
-				final ContextSpecKind contextType = ContextSpecKind.valueOf(json_param.getString("ContextSpecKind"));
-				switch (contextType) {
-					case CONTEXT_CALENDAR_EVENT: 
+			JSONArray flowsJson = new JSONArray(savedJson);
+			for (int ii = 0; ii < flowsJson.length(); ++ii) {
+				JSONObject flowJson = flowsJson.getJSONObject(ii);
+                Flow parsedFlow = new Flow(this);
+
+                // Parse the ContextSpec
+                JSONObject contextJson = flowJson.getJSONObject("ContextSpec");
+                String contextSpecKindString = contextJson.getString("ContextSpecKind");
+                ContextSpecKind contextSpecKind =
+                        ContextSpecKind.valueOf(contextSpecKindString);
+                ContextSpec parsedContextSpec = null;
+                switch (contextSpecKind) {
+                    case CONTEXT_CALENDAR_EVENT:
+                        CalendarEventContext newContextSpec = new CalendarEventContext();
+                        newContextSpec.loadFromJSON(contextJson);
+                        parsedContextSpec = newContextSpec;
+                        break;
 				}
+                parsedFlow.setContextSpec(parsedContextSpec);
+
+                JSONArray actionsJson = flowJson.getJSONArray("Reactions");
+                for (int aa = 0; aa < actionsJson.length(); ++aa) {
+
+                    JSONObject actionJson = actionsJson.getJSONObject(aa);
+                    String reactionKindString = actionJson.getString("ReactionKind");
+                    ReactionKind reactionKind = ReactionKind.valueOf(reactionKindString);
+                    Reaction parsedReaction = null;
+                    switch(reactionKind) {
+                        case REACTION_SUPPRESS_GPS:
+                            SuppressGPSAction newAction = new SuppressGPSAction();
+                            newAction.loadFromJSON(actionJson);
+                            parsedReaction = newAction;
+                    }
+
+                    if (parsedReaction != null) {
+                        parsedFlow.addReaction(parsedReaction);
+                    }
+                }
+
+                onAddContextSpec(parsedFlow);
+                mFlows.add(parsedFlow);
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
 	}
 
 	public void registerContextObserver(ContextSensor contextSensor) {
 		mContextObservers.put(contextSensor.getKind(), contextSensor);
 		contextSensor.registerManager(this);
 	}
-	
-	public void registerContext(ContextCond contextCond) {
-		mContexts.put(contextCond.getType(), contextCond);
-		mContextObservers.get(contextCond.getType()).addCond(contextCond);
-	}
 
-    public void unregisterContext(ContextCond contextCond) {
-        mContexts.remove(contextCond);
-        mContextObservers.get(contextCond.getType()).removeCond(contextCond);
+    public void onBeforeRemoveContextSpec(Flow flow) {
+        ContextSpec contextSpec = flow.getContextSpec();
+        ContextSensor contextSensor = mContextObservers.get(contextSpec.getType());
+        contextSpec.detachFromSensor(contextSensor);
+        mFlowsByContext.remove(contextSpec);
     }
-	
-	public void registerActionFlow(ReactionsList reactionsList) {
-		mReactionsLists.add(reactionsList);
-	}
 
-    public Flow getEmptyContextAction() {
-        ReactionsList reactionsList = new ReactionsList();
-        Flow pair = new Flow(this);
-        mFlows.add(pair);
-        return pair;
+
+    public void onAddContextSpec(Flow flow) {
+        ContextSpec contextSpec = flow.getContextSpec();
+        ContextSensor contextSensor = mContextObservers.get(contextSpec.getType());
+        contextSpec.attachToSensor(contextSensor);
+        mFlowsByContext.put(contextSpec, flow);
     }
-	
-	public void triggerImmediateContexts() {
-		ImmediateContextSensor immediateContextObserver =
-		(ImmediateContextSensor)mContextObservers.get(ContextSpecKind.CONTEXT_IMMEDIATE);
-		immediateContextObserver.triggerContext();
-	}
+
+    public Flow getNewFlow() {
+        Flow flow = new Flow(this);
+        mFlows.add(flow);
+        return flow;
+    }
 
 	public void triggerNextCalendarContext() {
 		CalenderEventContextSensor contextObserver =
@@ -99,25 +124,14 @@ public  class FlowManager {
 		contextObserver.triggerNextQueuedContext();
 	}
 	
-	public void triggerContext(ContextCond contextCond, SensedContext event, Bundle payload) {
-		for (Flow pair : mFlows) {
-			if (pair.getContext().equals(contextCond)) {
-				for (Reaction action : pair.getActions()) {
-					action.run(mApplicationContext, event, payload);
-				}
-			}
-		}
+	public void triggerContext(ContextSpec contextSpec, SensedContext event, Bundle payload) {
+        Flow flow = mFlowsByContext.get(contextSpec);
+        for (Reaction reaction : flow.getActions()) {
+            reaction.run(mApplicationContext, event, payload);
+        }
 	}
 
-	public Collection<ContextCond> getContexts() {
-		return mContexts.values();
-	}
-	
-	public Collection<ReactionsList> getActionFlows() {
-		return mReactionsLists;
-	}
-	
-	public ArrayList<Flow> getContextActions() {
+	public Collection<Flow> getContextActions() {
 		return mFlows;
 	}
 }

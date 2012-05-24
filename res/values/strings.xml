@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="hello">Hello World, AutocontextActivity!</string>
-    <string name="app_name">Autocontext</string>
+    <string name="app_name">Pact App</string>
 
+    <string name="set_context">Set Context</string>
+
+    <string name="trigger_next_calendar">Trigger Next Calendar Event</string>
+
+
+    <string name="action">Action</string>
+    <string name="context">Context</string>
+    <string name="flow">Flow</string>
 </resources>

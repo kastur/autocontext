@@ -5,4 +5,5 @@ public enum ReactionKind {
     ACTION_LAUNCH_PACKAGE,
     ACTION_BRIGHTNESS_VALUE,
     ACTION_WIFI,
+    REACTION_SUPPRESS_GPS,
 }

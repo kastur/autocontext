@@ -1,5 +1,6 @@
 package com.autocontext.actions;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -7,20 +8,28 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.autocontext.R;
-import com.autocontext.Reaction;
-import com.autocontext.SensedContext;
-import com.autocontext.SensedContextKind;
+import com.autocontext.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class SuppressGPSAction extends Reaction {
-    Bundle params;
-    LinearLayout editLayout;
-    HashMap<String, SensedContext> suppressContexts;
+public class SuppressGPSAction implements Reaction, Saveable {
+    HashMap<String, SensedContext> suppressContexts = new HashMap<String, SensedContext>();
 
-    public SuppressGPSAction(Bundle savedBundle) {
-        super(savedBundle);
+    @Override
+    public EditableModel getEditable(Activity activity) {
+        return new ModelView(activity);
+    }
+
+    @Override
+    public void loadFromJSON(JSONObject json) throws JSONException {
+
+    }
+
+    @Override
+    public JSONObject saveToJSON() throws JSONException {
+        return new JSONObject();
     }
 
     @Override
@@ -38,9 +47,9 @@ public class SuppressGPSAction extends Reaction {
         }
     }
 
-    public void createNotification(Context appContext, int imageResourceId, String titleText, String statusText)
-    {
-        NotificationManager notificationManager = (NotificationManager)appContext.getSystemService(Context.NOTIFICATION_SERVICE);
+    public void createNotification(Context appContext, int imageResourceId, String titleText, String statusText) {
+        NotificationManager notificationManager =
+                (NotificationManager)appContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Notification notification = new Notification(imageResourceId, titleText, System.currentTimeMillis());
 
@@ -51,27 +60,20 @@ public class SuppressGPSAction extends Reaction {
     }
 
     public void destroyNotification(Context appContext) {
-        NotificationManager notificationManager = (NotificationManager)appContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager =
+                (NotificationManager)appContext.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
     }
 
-    @Override
-    public void onCreate(Bundle savedState) {
-        suppressContexts = new HashMap<String, SensedContext>();
-        params = savedState;
-    }
-
-    @Override
-    public View getView(Context appContext) {
-        editLayout = new LinearLayout(appContext);
-        TextView textView = new TextView(appContext);
-        textView.setText("Suppress GPS");
-        editLayout.addView(textView);
-        return editLayout;
-    }
-
-    @Override
-    public void destroyView() {
-
+    private class ModelView implements EditableModel {
+        Activity activity;
+        ModelView(Activity activity) {
+            this.activity = activity;
+        }
+        @Override
+        public View getEditView() {
+            View view = activity.getLayoutInflater().inflate(R.layout.action_suppress_gps, null);
+            return view;
+        }
     }
 }

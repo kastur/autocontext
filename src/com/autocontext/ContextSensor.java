@@ -12,8 +12,9 @@ import android.content.Context;
 public abstract class ContextSensor {
     public abstract ContextSpecKind getKind();
     public abstract void onCreate(Context appContext);
-    public abstract void addCond(ContextCond contextCond);
-    public abstract void removeCond(ContextCond contextCond);
+    public abstract void addContextSpec(ContextSpec contextSpec);
+    public abstract void removeContextSpec(ContextSpec contextSpec);
+    public abstract void notifyAboutUpdatedContextSpec(ContextSpec contextSpec);
     public void registerManager(FlowManager manager) {
         mManager = manager;
     }

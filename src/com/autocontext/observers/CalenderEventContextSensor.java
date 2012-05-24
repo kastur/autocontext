@@ -46,12 +46,11 @@ public class CalenderEventContextSensor extends ContextSensor {
 	}
 
 	@Override
-	public void addCond(ContextCond context) {
-		mRegisteredContexts.add((CalendarEventContext)context);
-		context.onAttached(this);
-
+	public void addContextSpec(ContextSpec contextSpec) {
+		mRegisteredContexts.add((CalendarEventContext)contextSpec);
         ResetAndPopulateCalendarQueue();
 
+        /*
         ContentResolver resolver = mContext.getContentResolver();
         final CalendarEventContext calendarEventContext = (CalendarEventContext)context;
         List<CalendarInstanceTrigger> contextInstances = getInstancesThisWeek(resolver, calendarEventContext);
@@ -64,14 +63,22 @@ public class CalenderEventContextSensor extends ContextSensor {
         } else {
             calendarEventContext.setFeedbackText("No matches");
         }
+        */
 	}
 
     @Override
-    public void removeCond(ContextCond context) {
-        mRegisteredContexts.remove(context);
+    public void notifyAboutUpdatedContextSpec(ContextSpec contextSpec) {
+        mRegisteredContexts.add((CalendarEventContext)contextSpec);
+        ResetAndPopulateCalendarQueue();
     }
-	
-	public void triggerNextQueuedContext() {
+
+    @Override
+    public void removeContextSpec(ContextSpec contextSpec) {
+        mRegisteredContexts.remove(contextSpec);
+        ResetAndPopulateCalendarQueue();
+    }
+
+    public void triggerNextQueuedContext() {
 		if (triggerQueue.size() > 0)
 			runContexts(triggerQueue.peek().time);
 	}
@@ -156,7 +163,7 @@ public class CalenderEventContextSensor extends ContextSensor {
 	}
 	
 	public List<CalendarInstanceTrigger> getInstancesThisWeek(ContentResolver resolver, CalendarEventContext searchContext) {
-		final String searchTitle = searchContext.getFilterText();
+		final String searchTitle = searchContext.getEventFilterText();
 		
 		Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
 		long now = new Date().getTime();
