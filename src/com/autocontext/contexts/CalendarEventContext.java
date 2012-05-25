@@ -1,17 +1,24 @@
 package com.autocontext.contexts;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.view.*;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.autocontext.*;
+import com.autocontext.helpers.CalendarEventsDialog;
+import com.autocontext.helpers.CalendarHelper;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CalendarEventContext implements ContextSpec, Saveable {
 	ContextSensor mSensor;
@@ -19,17 +26,19 @@ public class CalendarEventContext implements ContextSpec, Saveable {
 	String mFilterText = "";
 
     @Override
-     public void loadFromJSON(JSONObject savedJson) {
+     public void loadFromJSON(JSONObject savedJson) throws JSONException {
         try {
-            mFilterText = savedJson.getString("filterText");
+        mFilterText = savedJson.getString("filterText");
         } catch (Exception e) {
-            e.printStackTrace();
+            mFilterText = "";
         }
     }
 
     @Override
-    public JSONObject saveToJSON() {
-        return new JSONObject();
+    public JSONObject saveToJSON() throws JSONException {
+        JSONObject contextJson =  new JSONObject();
+        contextJson.put("filterText", mFilterText);
+        return contextJson;
     }
 
     @Override
@@ -58,7 +67,7 @@ public class CalendarEventContext implements ContextSpec, Saveable {
         return mFilterText;
     }
 
-    public class ModelView implements EditableModel, TextWatcher {
+    public class ModelView implements EditableModel, TextWatcher, View.OnFocusChangeListener {
         Activity activity;
 
         public ModelView(Activity activity) {
@@ -72,7 +81,7 @@ public class CalendarEventContext implements ContextSpec, Saveable {
             EditText editText = (EditText)view.findViewById(R.id.event_title_filter_text);
             editText.setText(filterText);
             editText.addTextChangedListener(this);
-
+            editText.setOnFocusChangeListener(this);
             return view;
         }
 
@@ -85,6 +94,49 @@ public class CalendarEventContext implements ContextSpec, Saveable {
         @Override
         public void afterTextChanged(Editable editable) {
             CalendarEventContext.this.setEventFilterText(editable.toString());
+        }
+
+        ActionMode mActionMode = null;
+        @Override
+        public void onFocusChange(View view, boolean enterFocus) {
+            if (enterFocus == true) {
+                mActionMode = activity.startActionMode(mCalendarEventFilterFocusCallback);
+            } else {
+                mActionMode.finish();
+                mActionMode = null;
+            }
+        }
+
+        ActionMode.Callback mCalendarEventFilterFocusCallback = new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+                MenuInflater inflater = actionMode.getMenuInflater();
+                inflater.inflate(R.menu.calendar_event_filter_actbar, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                doTestSearchAndShowDialog();
+                return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode actionMode) {
+            }
+        };
+
+        private void doTestSearchAndShowDialog() {
+            ContentResolver contentResolver = activity.getContentResolver();
+            ArrayList<String> calendar_events = CalendarHelper.searchCalendarEventTitlesInTheNextWeekFor(contentResolver, mFilterText);
+            CalendarEventsDialog dialog = new CalendarEventsDialog(activity);
+            dialog.setEvents(calendar_events);
+            dialog.showDialog();
         }
     };
 

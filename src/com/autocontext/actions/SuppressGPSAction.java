@@ -18,6 +18,11 @@ public class SuppressGPSAction implements Reaction, Saveable {
     HashMap<String, SensedContext> suppressContexts = new HashMap<String, SensedContext>();
 
     @Override
+    public ReactionKind getType() {
+        return ReactionKind.REACTION_SUPPRESS_GPS;
+    }
+
+    @Override
     public EditableModel getEditable(Activity activity) {
         return new ModelView(activity);
     }

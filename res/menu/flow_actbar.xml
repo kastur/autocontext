@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/flow_actbar_remove_flow"
+          android:icon="@android:drawable/ic_menu_delete"
+          android:title="Delete"
+          android:showAsAction="ifRoom|withText" />
+    <item android:id="@+id/flow_actbar_edit_flow"
+          android:icon="@android:drawable/ic_menu_edit"
+          android:title="Edit"
+          android:showAsAction="ifRoom|withText" />
+</menu>

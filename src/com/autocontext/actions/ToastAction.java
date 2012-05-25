@@ -18,7 +18,12 @@ public class ToastAction implements Reaction, Saveable {
 
 	String mToastText = "";
 
-	@Override
+    @Override
+    public ReactionKind getType() {
+        return ReactionKind.REACTION_TOAST;
+    }
+
+    @Override
 	public void run(Context appContext, SensedContext event, Bundle payload) {
 		String extraMessage = payload.getString("toastExtras", "No extras");
 		Toast.makeText(appContext, mToastText + ": " + extraMessage, Toast.LENGTH_SHORT).show();

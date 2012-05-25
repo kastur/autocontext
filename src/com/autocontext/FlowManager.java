@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 import com.autocontext.actions.SuppressGPSAction;
 import com.autocontext.contexts.CalendarEventContext;
 import com.autocontext.observers.CalenderEventContextSensor;
@@ -27,70 +28,50 @@ public  class FlowManager {
 		mFlows = new ArrayList<Flow>();
 	}
 	
-	public void init(Context context) {
+	public void Initialize(Context context) {
 		mApplicationContext = context.getApplicationContext();
-		
 		for (ContextSensor sensor : mContextObservers.values()) {
-			sensor.onCreate(context);
+			sensor.Initialize(context);
 		}
 
-		
-		mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-		Map<String, ?> allPrefs = mPrefs.getAll();
-		for (Object dataObj : allPrefs.values()) {
-			final String dataStr = (String)dataObj;
-			AddContextActionFromString(dataStr);
-		}		
+        loadFlows();
+
 	}
-	
-	public void AddContextActionFromString(String savedJson) {
-		try {
-			JSONArray flowsJson = new JSONArray(savedJson);
-			for (int ii = 0; ii < flowsJson.length(); ++ii) {
-				JSONObject flowJson = flowsJson.getJSONObject(ii);
-                Flow parsedFlow = new Flow(this);
 
-                // Parse the ContextSpec
-                JSONObject contextJson = flowJson.getJSONObject("ContextSpec");
-                String contextSpecKindString = contextJson.getString("ContextSpecKind");
-                ContextSpecKind contextSpecKind =
-                        ContextSpecKind.valueOf(contextSpecKindString);
-                ContextSpec parsedContextSpec = null;
-                switch (contextSpecKind) {
-                    case CONTEXT_CALENDAR_EVENT:
-                        CalendarEventContext newContextSpec = new CalendarEventContext();
-                        newContextSpec.loadFromJSON(contextJson);
-                        parsedContextSpec = newContextSpec;
-                        break;
-				}
-                parsedFlow.setContextSpec(parsedContextSpec);
+    public void loadFlows() {
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(mApplicationContext);
+        try {
+            JSONArray flowsJson = new JSONArray(mPrefs.getString("flows", "[]"));
+            for (int ii = 0; ii < flowsJson.length(); ++ii) {
+                Flow flow = new Flow(this);
+                flow.loadFromJSON(flowsJson.getJSONObject(ii));
+                mFlows.add(flow);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(mApplicationContext, "Error loading saved flows.", Toast.LENGTH_LONG);
+        }
+    }
 
-                JSONArray actionsJson = flowJson.getJSONArray("Reactions");
-                for (int aa = 0; aa < actionsJson.length(); ++aa) {
+    public void saveFlows() {
 
-                    JSONObject actionJson = actionsJson.getJSONObject(aa);
-                    String reactionKindString = actionJson.getString("ReactionKind");
-                    ReactionKind reactionKind = ReactionKind.valueOf(reactionKindString);
-                    Reaction parsedReaction = null;
-                    switch(reactionKind) {
-                        case REACTION_SUPPRESS_GPS:
-                            SuppressGPSAction newAction = new SuppressGPSAction();
-                            newAction.loadFromJSON(actionJson);
-                            parsedReaction = newAction;
-                    }
+        int ii = 0;
+        JSONArray flowsJson = new JSONArray();
 
-                    if (parsedReaction != null) {
-                        parsedFlow.addReaction(parsedReaction);
-                    }
-                }
+        try {
+            for (Flow flow : mFlows) {
+                JSONObject flowJson = flow.saveToJSON();
+                flowsJson.put(flowJson);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(mApplicationContext, "Error saving flows.", Toast.LENGTH_LONG);
+        }
 
-                onAddContextSpec(parsedFlow);
-                mFlows.add(parsedFlow);
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-	}
+        SharedPreferences.Editor ed = mPrefs.edit();
+        ed.putString("flows", flowsJson.toString());
+        ed.commit();
+    }
 
 	public void registerContextObserver(ContextSensor contextSensor) {
 		mContextObservers.put(contextSensor.getKind(), contextSensor);
@@ -112,11 +93,7 @@ public  class FlowManager {
         mFlowsByContext.put(contextSpec, flow);
     }
 
-    public Flow getNewFlow() {
-        Flow flow = new Flow(this);
-        mFlows.add(flow);
-        return flow;
-    }
+
 
 	public void triggerNextCalendarContext() {
 		CalenderEventContextSensor contextObserver =
@@ -137,5 +114,19 @@ public  class FlowManager {
 
     public Flow getFlow(int flow_ii) {
         return mFlows.get(flow_ii);
+    }
+
+    public void removeFlow(int flow_ii) {
+        Flow flow = mFlows.get(flow_ii);
+        if (flow.getContextSpec() != null) {
+            this.onBeforeRemoveContextSpec(flow);
+        }
+        mFlows.remove(flow);
+    }
+
+    public int getNewFlow() {
+        Flow flow = new Flow(this);
+        mFlows.add(flow);
+        return mFlows.size()-1;
     }
 }

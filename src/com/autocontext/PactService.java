@@ -27,9 +27,12 @@ public class PactService extends Service {
 		super.onCreate();
 		flowManager = new FlowManager();
 		flowManager.registerContextObserver(new CalenderEventContextSensor());
-		flowManager.init(getApplicationContext());
-        flowManager.getNewFlow();
+		flowManager.Initialize(getApplicationContext());
 	}
-	
-	
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        flowManager.saveFlows();
+    }
 }

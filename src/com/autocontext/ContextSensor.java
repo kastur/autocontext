@@ -11,7 +11,7 @@ import android.content.Context;
  */
 public abstract class ContextSensor {
     public abstract ContextSpecKind getKind();
-    public abstract void onCreate(Context appContext);
+    public abstract void Initialize(Context appContext);
     public abstract void addContextSpec(ContextSpec contextSpec);
     public abstract void removeContextSpec(ContextSpec contextSpec);
     public abstract void notifyAboutUpdatedContextSpec(ContextSpec contextSpec);

@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class Flow {
+public class Flow implements Saveable {
     private FlowManager mManager;
     private ContextSpec mContextSpec;
     private ArrayList<Reaction> mReactions;
@@ -26,6 +26,72 @@ public class Flow {
         mContextSpec = null;
         mReactions = new ArrayList<Reaction>();
         mName = "";
+    }
+
+    @Override
+    public void loadFromJSON(JSONObject flowJson) throws JSONException {
+        // Parse the name
+        mName = flowJson.getString("name");
+        // Parse the ContextSpec.
+        JSONObject contextJson = flowJson.getJSONObject("ContextSpec");
+        String contextSpecKindString = contextJson.getString("ContextSpecKind");
+        ContextSpecKind contextSpecKind =
+                ContextSpecKind.valueOf(contextSpecKindString);
+        ContextSpec parsedContextSpec = null;
+        switch (contextSpecKind) {
+            case CONTEXT_CALENDAR_EVENT:
+                CalendarEventContext newContextSpec = new CalendarEventContext();
+                newContextSpec.loadFromJSON(contextJson);
+                parsedContextSpec = newContextSpec;
+                break;
+        }
+        if (parsedContextSpec != null) {
+            this.setContextSpec(parsedContextSpec);
+        }
+
+        // Parse the actions.
+        JSONArray actionsJson = flowJson.getJSONArray("Reactions");
+        for (int aa = 0; aa < actionsJson.length(); ++aa) {
+            JSONObject actionJson = actionsJson.getJSONObject(aa);
+            String reactionKindString = actionJson.getString("ReactionKind");
+            ReactionKind reactionKind = ReactionKind.valueOf(reactionKindString);
+            Reaction parsedReaction = null;
+            switch(reactionKind) {
+                case REACTION_SUPPRESS_GPS:
+                    SuppressGPSAction newAction = new SuppressGPSAction();
+                    newAction.loadFromJSON(actionJson);
+                    parsedReaction = newAction;
+            }
+
+            if (parsedReaction != null) {
+                this.addReaction(parsedReaction);
+            }
+        }
+    }
+
+    @Override
+    public JSONObject saveToJSON() throws JSONException {
+        JSONObject flowJson = new JSONObject();
+        flowJson.put("name", mName);
+
+        if (mContextSpec != null) {
+            JSONObject contextSpecJson = mContextSpec.saveToJSON();
+            contextSpecJson.put("ContextSpecKind", mContextSpec.getType().toString());
+            flowJson.put("ContextSpec", contextSpecJson);
+        } else {
+            JSONObject contextSpecJson = new JSONObject();
+            contextSpecJson.put("ContextSpecKind", ContextSpecKind.UNDEFINED.toString());
+            flowJson.put("ContextSpec", contextSpecJson);
+        }
+
+        JSONArray actionsJson = new JSONArray();
+        for (int ii = 0; ii < mReactions.size(); ++ii) {
+            JSONObject actionJson = mReactions.get(ii).saveToJSON();
+            actionJson.put("ReactionKind", mReactions.get(ii).getType());
+            actionsJson.put(actionJson);
+        }
+        flowJson.put("Reactions", actionsJson);
+        return flowJson;
     }
 
     public ContextSpec getContextSpec() {

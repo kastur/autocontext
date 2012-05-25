@@ -6,16 +6,20 @@ import android.content.*;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.CalendarContract;
 import android.text.format.DateUtils;
+import android.util.Log;
 import com.autocontext.*;
 import com.autocontext.contexts.CalendarEventContext;
 
 import java.util.*;
 
 public class CalenderEventContextSensor extends ContextSensor {
+    private static final String TAG = "CalenderEventContextSensor";
+
 	public static final boolean kAndroidVersionGingerbread = false;
 	private Context mContext;
 	private HashSet<CalendarEventContext> mRegisteredContexts;
@@ -38,7 +42,8 @@ public class CalenderEventContextSensor extends ContextSensor {
 	}
 
 	@Override
-	public void onCreate(Context appContext) {
+	public void Initialize(Context appContext) {
+        Log.i(TAG, "Initialize...");
 		mContext = appContext;
 		mRegisteredContexts = new HashSet<CalendarEventContext>();
 		triggerQueue = new PriorityQueue<CalendarInstanceTrigger>();
@@ -48,6 +53,7 @@ public class CalenderEventContextSensor extends ContextSensor {
 	@Override
 	public void addContextSpec(ContextSpec contextSpec) {
 		mRegisteredContexts.add((CalendarEventContext)contextSpec);
+        Log.i(TAG, "contextSpec added, refreshing.");
         ResetAndPopulateCalendarQueue();
 
         /*
@@ -69,12 +75,14 @@ public class CalenderEventContextSensor extends ContextSensor {
     @Override
     public void notifyAboutUpdatedContextSpec(ContextSpec contextSpec) {
         mRegisteredContexts.add((CalendarEventContext)contextSpec);
+        Log.i(TAG, "contextSpec updated, refreshing.");
         ResetAndPopulateCalendarQueue();
     }
 
     @Override
     public void removeContextSpec(ContextSpec contextSpec) {
         mRegisteredContexts.remove(contextSpec);
+        Log.i(TAG, "contextSpec removed, refreshing.");
         ResetAndPopulateCalendarQueue();
     }
 
@@ -104,6 +112,7 @@ public class CalenderEventContextSensor extends ContextSensor {
 		@Override
 		public void onChange(boolean selfChange) {
 			super.onChange(selfChange);
+            Log.i(TAG, "The calendar is updated, refreshing.");
 			ResetAndPopulateCalendarQueue();
 		}
 	};
@@ -119,6 +128,13 @@ public class CalenderEventContextSensor extends ContextSensor {
 				triggerQueue.add(trigger);
 			}
 		}
+
+
+        if (triggerQueue.size() == 0) {
+            Log.i(TAG, "EVENT QUEUE IS EMPTY");
+        }  else {
+            Log.i(TAG, triggerQueue.peek().event_title + " " + triggerQueue.peek().time);
+        }
 		
 		WakeUpNextOn(triggerQueue.peek());
 	}
@@ -131,6 +147,8 @@ public class CalenderEventContextSensor extends ContextSensor {
         long instanceBeginTime = calendarEvent.time.getTime();
 
         AlarmManager alarmMan = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+
+        Log.i(TAG, "Setting alarm for next event: " +  calendarEvent.time);
         alarmMan.set(AlarmManager.RTC_WAKEUP, instanceBeginTime, sender);
 	}
 	

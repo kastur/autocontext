@@ -6,8 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -35,15 +34,92 @@ public class FlowManagerActivity extends BaseFlowActivity {
         flowArrayAdapter.addAll(mFlowManager.getFlows());
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.pact_menu, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.pact_save_flows:
+                mFlowManager.saveFlows();
+                return true;
+            case R.id.pact_load_flows:
+                mFlowManager.loadFlows();
+                return true;
+            case R.id.pact_add_flow:
+                int new_flow_ii = mFlowManager.getNewFlow();
+                Flow newFlow = mFlowManager.getFlow(new_flow_ii);
+                flowArrayAdapter.add(newFlow);
+                startEditFlowActivity(new_flow_ii);
+                return true;
+            case R.id.pact_trigger_next_calendar_context:
+                mFlowManager.triggerNextCalendarContext();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
-    AdapterView.OnItemClickListener flowItemClickListener = new AdapterView.OnItemClickListener() {
+    private void startEditFlowActivity(int flow_ii) {
+        Intent intent = new Intent(FlowManagerActivity.this, FlowActivity.class);
+        intent.putExtra("flow_ii", flow_ii);
+        startActivity(intent);
+    }
+
+    int mSelectedFlowIndex = -1;
+    private AdapterView.OnItemClickListener flowItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
-        public void onItemClick(AdapterView<?> adapterView, View view, int item_ii, long l) {
-            Flow flow = flowArrayAdapter.getItem(item_ii);
-            Intent intent = new Intent(FlowManagerActivity.this, FlowActivity.class);
-            intent.putExtra("flow_ii", item_ii);
-            startActivity(intent);
+        public void onItemClick(AdapterView<?> adapterView, View view, int flow_ii, long l) {
+            mSelectedFlowIndex = flow_ii;
+            if (mActionMode == null) {
+                mActionMode = startActionMode(mFlowSelectedActionCallback);
+            }
+        }
+    };
+
+    ActionMode mActionMode = null;
+    ActionMode.Callback mFlowSelectedActionCallback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            actionMode.getMenuInflater().inflate(R.menu.flow_actbar, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            switch(menuItem.getItemId()) {
+                case R.id.flow_actbar_remove_flow:
+                    Flow remFlow = mFlowManager.getFlow(mSelectedFlowIndex);
+                    mFlowManager.removeFlow(mSelectedFlowIndex);
+                    flowArrayAdapter.remove(remFlow);
+
+                    mActionMode = null;
+                    return true;
+
+                case R.id.flow_actbar_edit_flow:
+                    startEditFlowActivity(mSelectedFlowIndex);
+                    actionMode.finish();
+                    mActionMode = null;
+                    return true;
+            }
+            actionMode.finish();
+            mActionMode = null;
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode actionMode) {
+            //To change body of implemented methods use File | Settings | File Templates.
         }
     };
 

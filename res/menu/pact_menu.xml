@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/pact_save_flows"
+          android:icon="@drawable/ic_menu_save"
+          android:title="Save Flows"
+          android:showAsAction="ifRoom|withText" />
+
+    <item android:id="@+id/pact_load_flows"
+          android:icon="@drawable/ic_menu_archive"
+          android:title="Load Flows"
+          android:showAsAction="ifRoom|withText" />
+
+    <item android:id="@+id/pact_trigger_next_calendar_context"
+          android:icon="@android:drawable/ic_menu_agenda"
+          android:title="Debug: Trigger calendar"
+          android:showAsAction="ifRoom|withText" />
+
+    <item android:id="@+id/pact_add_flow"
+          android:icon="@android:drawable/ic_menu_add"
+          android:title="Add New Flow"
+          android:showAsAction="ifRoom|withText" />
+</menu>

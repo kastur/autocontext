@@ -13,4 +13,7 @@ public interface ContextSpec {
     void attachToSensor(ContextSensor sensor);
     void detachFromSensor(ContextSensor sensor);
     EditableModel getEditable(Activity activity);
+
+    void loadFromJSON(JSONObject json) throws JSONException;
+    JSONObject saveToJSON() throws JSONException;
 }

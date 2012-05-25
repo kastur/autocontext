@@ -8,12 +8,32 @@ import android.content.ServiceConnection;
 import android.os.*;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
 
 public class FlowActivity extends BaseFlowActivity {
 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent(this, FlowManagerActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     public void handleOnServiceConnected(Message msg) {
@@ -26,7 +46,6 @@ public class FlowActivity extends BaseFlowActivity {
         Flow flow = mFlowManager.getFlow(flow_ii);
         View flowView = flow.getEditable(activity).getEditView();
 
-        LinearLayout rootLayout = (LinearLayout)findViewById(R.id.root_layout);
-        rootLayout.addView(flowView);
+        setContentView(flowView);
     }
 }

@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
 
     <TextView android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:text="Calendar Event Filter"
               android:textSize="20sp" />
 
-    <EditText android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:id="@+id/event_title_filter_text"
-              android:hint="Specify event by regular expression" />
-
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+            android:orientation="horizontal">
+        <EditText android:layout_width="fill_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_weight="1"
+                  android:id="@+id/event_title_filter_text"
+                  android:hint="Regular expression for calendar event." />
+    </LinearLayout>
 </LinearLayout>
