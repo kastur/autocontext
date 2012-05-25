@@ -15,7 +15,7 @@ import java.util.*;
 
 public  class FlowManager {
 	HashMap<ContextSpecKind, ContextSensor> mContextObservers;
-    HashSet<Flow> mFlows;
+    ArrayList<Flow> mFlows;
     HashMap<ContextSpec, Flow> mFlowsByContext;
 
 	Context mApplicationContext;
@@ -24,7 +24,7 @@ public  class FlowManager {
 	public FlowManager() {
 		mContextObservers = new HashMap<ContextSpecKind, ContextSensor>();
 		mFlowsByContext = new HashMap<ContextSpec, Flow>();
-		mFlows = new HashSet<Flow>();
+		mFlows = new ArrayList<Flow>();
 	}
 	
 	public void init(Context context) {
@@ -131,7 +131,11 @@ public  class FlowManager {
         }
 	}
 
-	public Collection<Flow> getContextActions() {
+	public ArrayList<Flow> getFlows() {
 		return mFlows;
 	}
+
+    public Flow getFlow(int flow_ii) {
+        return mFlows.get(flow_ii);
+    }
 }

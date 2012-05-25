@@ -1,9 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:orientation="vertical" >
+
+    <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/name_colon"
+                android:textSize="18sp" />
+
+
+        <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:id="@+id/flow_edit_name" />
+    </LinearLayout>
 
     <TextView
             android:layout_width="wrap_content"
@@ -12,7 +31,7 @@
             android:textSize="25sp" />
 
     <LinearLayout android:id="@+id/context_layout"
-                  android:layout_width="wrap_content"
+                  android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
                   android:orientation="vertical">
         <TextView
@@ -24,13 +43,18 @@
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/action" android:textSize="25sp" />
-    <LinearLayout android:id="@+id/actions_layout"
-                  android:layout_width="wrap_content"
+            android:text="@string/action"
+            android:textSize="25sp" />
+
+    <ListView android:id="@+id/actions_layout"
+                  android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
-                  android:orientation="vertical">
-        <TextView android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                android:text="No context set." />
-    </LinearLayout>
+                  android:orientation="vertical" />
+
+
+    <Button android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/add_suppress_gps_action"
+                android:text="Suppress GPS" />
+
 </LinearLayout>

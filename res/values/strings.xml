@@ -11,4 +11,7 @@
     <string name="action">Action</string>
     <string name="context">Context</string>
     <string name="flow">Flow</string>
+    <string name="name_colon">Name:</string>
+
+    <string name="unnamed_flow">Unnamed Flow</string>
 </resources>

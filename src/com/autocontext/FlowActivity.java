@@ -5,64 +5,28 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
-import android.os.IBinder;
+import android.os.*;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 
 
-public class FlowActivity extends Activity {
+public class FlowActivity extends BaseFlowActivity {
+
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        final Context applicationContext = getApplicationContext();
+    public void handleOnServiceConnected(Message msg) {
+        super.handleOnServiceConnected(msg);
 
-        Intent serviceIntent = new Intent(applicationContext, PactService.class);
-        startService(serviceIntent);
-		bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        final Activity activity = this;
 
-        setContentView(R.layout.main);
+        Bundle bundle = getIntent().getExtras();
+        int flow_ii = bundle.getInt("flow_ii");
+        Flow flow = mFlowManager.getFlow(flow_ii);
+        View flowView = flow.getEditable(activity).getEditView();
+
+        LinearLayout rootLayout = (LinearLayout)findViewById(R.id.root_layout);
+        rootLayout.addView(flowView);
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.flow_actions, menu);
-        return true;
-    }
-
-    public void onConnect() {
-        Render();
-    }
-    
-    public void Render() {
-        Activity activity = this;
-
-        Flow flow = mFlowManager.getNewFlow();
-        setContentView(flow.getEditable(activity).getEditView());
-    }
-
-    private OnClickListener clickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (v.getId() == R.id.trigger_next_calendar) {
-                mFlowManager.triggerNextCalendarContext();
-            }
-        }
-    };
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName name, IBinder binder) {
-            mFlowManager = ((PactService.LocalBinder)binder).getFlowManager();
-            onConnect();
-        }
-
-        public void onServiceDisconnected(ComponentName name) { }
-    };
-
-    private FlowManager mFlowManager;
 }
