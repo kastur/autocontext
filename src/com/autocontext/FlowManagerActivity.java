@@ -49,7 +49,12 @@ public class FlowManagerActivity extends BaseFlowActivity {
                 mFlowManager.saveFlows();
                 return true;
             case R.id.pact_load_flows:
+                for (Flow flow : mFlowManager.getFlows())  {
+                    flowArrayAdapter.remove(flow);
+                }
                 mFlowManager.loadFlows();
+                flowArrayAdapter.addAll(mFlowManager.getFlows());
+                flowArrayAdapter.notifyDataSetInvalidated();
                 return true;
             case R.id.pact_add_flow:
                 int new_flow_ii = mFlowManager.getNewFlow();

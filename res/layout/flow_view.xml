@@ -69,10 +69,13 @@
                       android:orientation="vertical" />
 
 
-        <Button android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/add_suppress_gps_action"
-                    android:text="Suppress GPS" />
+
+
+        <Button android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/add_action_button"
+                android:text="Add Action" />
+
     </LinearLayout>
 
 </LinearLayout>

@@ -1,13 +1,14 @@
 package com.autocontext.actions;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.autocontext.*;
@@ -15,8 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class ToastAction implements Reaction, Saveable {
-
-	String mToastText = "";
+    private String mToastText;
 
     @Override
     public ReactionKind getType() {
@@ -24,39 +24,51 @@ public class ToastAction implements Reaction, Saveable {
     }
 
     @Override
-	public void run(Context appContext, SensedContext event, Bundle payload) {
-		String extraMessage = payload.getString("toastExtras", "No extras");
-		Toast.makeText(appContext, mToastText + ": " + extraMessage, Toast.LENGTH_SHORT).show();
-	}
-
-    @Override
     public EditableModel getEditable(Activity activity) {
         return new ModelView(activity);
     }
 
     @Override
-    public void loadFromJSON(JSONObject json) throws JSONException {
-        mToastText = json.getString("toast_text");
+    public void loadFromJSON(JSONObject savedJson) throws JSONException {
+        try {
+            mToastText = savedJson.getString("toastText");
+        } catch (Exception e) {
+            mToastText = "";
+        }
     }
 
     @Override
     public JSONObject saveToJSON() throws JSONException {
-        JSONObject json = new JSONObject();
-        json.put("toast_text", mToastText);
-        return json;
+        return new JSONObject();
     }
 
-    private class ModelView implements EditableModel, TextWatcher {
+    @Override
+    public void run(Context appContext, SensedContext event, Bundle payload) {
+        String extras = payload.getString("toastExtras", "No extra details.");
+        Toast.makeText(appContext, mToastText + "::" + extras, Toast.LENGTH_LONG).show();
+    }
+
+    public String getToastText() {
+        return mToastText;
+    }
+
+    public void setToastText(String toastText) {
+        mToastText = toastText;
+    }
+
+    public class ModelView implements EditableModel, TextWatcher {
         Activity activity;
+
         public ModelView(Activity activity) {
             this.activity = activity;
         }
 
         @Override
         public View getEditView() {
-            View view = activity.getLayoutInflater().inflate(R.layout.action_toast, null);
+            String filterText = ToastAction.this.getToastText();
+            View view = activity.getLayoutInflater().inflate(R.layout.toast_action_layout, null);
             EditText editText = (EditText)view.findViewById(R.id.toast_text);
-            editText.setText(mToastText);
+            editText.setText(filterText);
             editText.addTextChangedListener(this);
             return view;
         }
@@ -69,7 +81,7 @@ public class ToastAction implements Reaction, Saveable {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            mToastText = editable.toString();
+            ToastAction.this.setToastText(editable.toString());
         }
-    }
+    };
 }

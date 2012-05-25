@@ -2,11 +2,11 @@ package com.autocontext;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
-import com.autocontext.actions.SuppressGPSAction;
-import com.autocontext.contexts.CalendarEventContext;
 import com.autocontext.observers.CalenderEventContextSensor;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.util.*;
 
 public  class FlowManager {
+    private static final String TAG = "FlowManager";
 	HashMap<ContextSpecKind, ContextSensor> mContextObservers;
     ArrayList<Flow> mFlows;
     HashMap<ContextSpec, Flow> mFlowsByContext;
@@ -33,15 +34,21 @@ public  class FlowManager {
 		for (ContextSensor sensor : mContextObservers.values()) {
 			sensor.Initialize(context);
 		}
-
-        loadFlows();
-
 	}
 
     public void loadFlows() {
+        for (int ii = 0; ii < mFlows.size(); ++ii) {
+            removeFlow(ii);
+        }
+
         mPrefs = PreferenceManager.getDefaultSharedPreferences(mApplicationContext);
+
+
+
         try {
             JSONArray flowsJson = new JSONArray(mPrefs.getString("flows", "[]"));
+            Log.i(TAG, "LOADING JSON");
+            Log.i(TAG, flowsJson.toString());
             for (int ii = 0; ii < flowsJson.length(); ++ii) {
                 Flow flow = new Flow(this);
                 flow.loadFromJSON(flowsJson.getJSONObject(ii));
@@ -69,6 +76,8 @@ public  class FlowManager {
         }
 
         SharedPreferences.Editor ed = mPrefs.edit();
+        Log.i(TAG, "SAVING JSON");
+        Log.i(TAG, flowsJson.toString());
         ed.putString("flows", flowsJson.toString());
         ed.commit();
     }

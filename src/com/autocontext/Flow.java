@@ -2,12 +2,16 @@ package com.autocontext;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.database.DataSetObserver;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.*;
 import android.widget.*;
-import com.autocontext.actions.SuppressGPSAction;
+import com.autocontext.actions.DisableAccelerometerAction;
+import com.autocontext.actions.DisableGPSAction;
+import com.autocontext.actions.DisableMicrophoneAction;
+import com.autocontext.actions.ToastAction;
 import com.autocontext.contexts.CalendarEventContext;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,13 +61,24 @@ public class Flow implements Saveable {
             ReactionKind reactionKind = ReactionKind.valueOf(reactionKindString);
             Reaction parsedReaction = null;
             switch(reactionKind) {
-                case REACTION_SUPPRESS_GPS:
-                    SuppressGPSAction newAction = new SuppressGPSAction();
-                    newAction.loadFromJSON(actionJson);
-                    parsedReaction = newAction;
+                case REACTION_TOAST:
+                    parsedReaction = new ToastAction();
+                    break;
+                case REACTION_DISABLE_GPS:
+                    parsedReaction = new DisableGPSAction();
+                    break;
+                case REACTION_DISABLE_ACCELEROMETER:
+                    parsedReaction = new DisableAccelerometerAction();
+                    break;
+                case REACTION_DISABLE_MICROPHONE:
+                    parsedReaction = new DisableMicrophoneAction();
+                    break;
             }
 
+            parsedReaction.loadFromJSON(actionJson);
+
             if (parsedReaction != null) {
+
                 this.addReaction(parsedReaction);
             }
         }
@@ -168,7 +183,7 @@ public class Flow implements Saveable {
             actionsListView.setOnItemLongClickListener(actionLongClickListener);
             actionAdapter.addAll(mReactions);
 
-            Button addActionButton = (Button)rootView.findViewById(R.id.add_suppress_gps_action);
+            Button addActionButton = (Button)rootView.findViewById(R.id.add_action_button);
             addActionButton.setOnClickListener(addActionClickListener);
 
             return rootView;
@@ -213,22 +228,52 @@ public class Flow implements Saveable {
             }
         };
 
+
+
         private View.OnClickListener addActionClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ListView actionsListView =
-                        (ListView)rootView.findViewById(R.id.actions_layout);
 
-                Reaction newReaction = null;
-                if (view.getId() == R.id.add_suppress_gps_action) {
-                    newReaction = new SuppressGPSAction();
-                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle("Choose an action");
 
-                mReactions.add(newReaction);
-                actionAdapter.add(newReaction);
-                actionAdapter.notifyDataSetChanged();
+                String[] items = activity.getResources().getStringArray(R.array.actions_array);
+
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int item) {
+                        addActionByNameResource(item);
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+
+
             }
         };
+
+        private void addActionByNameResource(int id) {
+
+            String[] items = activity.getResources().getStringArray(R.array.actions_array);
+            String selectedItem = items[id];
+
+            Reaction newReaction = null;
+            if (selectedItem.equals("Toast"))
+                newReaction = new ToastAction();
+            else if (selectedItem.equals("Location: Disable"))
+                newReaction = new DisableGPSAction();
+            else if (selectedItem.equals("Accelerometer: Disable"))
+                newReaction = new DisableAccelerometerAction();
+            else if (selectedItem.equals("Microphone: Disable"))
+                newReaction = new DisableMicrophoneAction();
+            else {
+                Toast.makeText(activity, "Not yet supported!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            actionAdapter.add(newReaction);
+            mReactions.add(newReaction);
+            actionAdapter.notifyDataSetInvalidated();
+        }
 
         private class ActionArrayAdapter extends ArrayAdapter<Reaction> {
             ActionArrayAdapter() {

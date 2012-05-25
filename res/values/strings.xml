@@ -14,4 +14,17 @@
     <string name="name_colon">Name:</string>
 
     <string name="unnamed_flow">Unnamed Flow</string>
+
+    <string name="add_action_prompt">Add new action:</string>
+    <string-array name="actions_array">
+        <item>Toast</item>
+        <item>Location: Disable</item>
+        <item>Location: On-Demand*</item>
+        <item>Location: Cell-tower*</item>
+        <item>Location: Zip-code*</item>
+        <item>Accelerometer: Disable</item>
+        <item>Microphone: Disable</item>
+        <item>App Launch*</item>
+        <item>App Kill*</item>
+    </string-array>
 </resources>

@@ -9,6 +9,13 @@
         <option name="name" value="CalenderEventContextSensor" />
         <option name="pid" value="" />
       </filter>
+      <filter>
+        <option name="logLevel" value="verbose" />
+        <option name="logMessagePattern" value="" />
+        <option name="logTagPattern" value="FlowManager" />
+        <option name="name" value="FlowManager" />
+        <option name="pid" value="" />
+      </filter>
     </filters>
   </component>
   <component name="AndroidLayoutPreviewToolWindow">
@@ -27,35 +34,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1acf0cb2-aaee-4c45-b6ae-c1035fbaa5bb" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/drawable-hdpi/ic_menu_archive.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/drawable-hdpi/ic_menu_save.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/layout/calendar_events_dialog.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/menu/calendar_event_filter_actbar.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/menu/flow_actbar.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/menu/pact_menu.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/autocontext/helpers/CalendarEventsDialog.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/autocontext/helpers/CalendarHelper.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/layout/action_item.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/layout/just_a_label.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res/layout/toast_action_layout.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/autocontext/actions/DisableAccelerometerAction.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/autocontext/actions/DisableGPSAction.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/com/autocontext/actions/DisableMicrophoneAction.java" />
+      <change type="DELETED" beforePath="C:\Users\k\Desktop\autocontext\res\layout\action_suppress_gps.xml" afterPath="" />
+      <change type="MOVED" beforePath="C:\Users\k\Desktop\autocontext\src\com\autocontext\actions\SuppressGPSAction.java" afterPath="$PROJECT_DIR$/src/com/autocontext/actions/BaseNotifyAction.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/layout/calendar_spec_view.xml" afterPath="$PROJECT_DIR$/res/layout/calendar_spec_view.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/layout/flow_item_view.xml" afterPath="$PROJECT_DIR$/res/layout/flow_item_view.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/layout/flow_list.xml" afterPath="$PROJECT_DIR$/res/layout/flow_list.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/layout/flow_view.xml" afterPath="$PROJECT_DIR$/res/layout/flow_view.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/menu/action_actbar.xml" afterPath="$PROJECT_DIR$/res/menu/action_actbar.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/ContextSensor.java" afterPath="$PROJECT_DIR$/src/com/autocontext/ContextSensor.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/ContextSpec.java" afterPath="$PROJECT_DIR$/src/com/autocontext/ContextSpec.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/ContextSpecKind.java" afterPath="$PROJECT_DIR$/src/com/autocontext/ContextSpecKind.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res/values/strings.xml" afterPath="$PROJECT_DIR$/res/values/strings.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/Flow.java" afterPath="$PROJECT_DIR$/src/com/autocontext/Flow.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/FlowActivity.java" afterPath="$PROJECT_DIR$/src/com/autocontext/FlowActivity.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/FlowManager.java" afterPath="$PROJECT_DIR$/src/com/autocontext/FlowManager.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/FlowManagerActivity.java" afterPath="$PROJECT_DIR$/src/com/autocontext/FlowManagerActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/PactService.java" afterPath="$PROJECT_DIR$/src/com/autocontext/PactService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/Reaction.java" afterPath="$PROJECT_DIR$/src/com/autocontext/Reaction.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/ReactionKind.java" afterPath="$PROJECT_DIR$/src/com/autocontext/ReactionKind.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/actions/SuppressGPSAction.java" afterPath="$PROJECT_DIR$/src/com/autocontext/actions/SuppressGPSAction.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/actions/ToastAction.java" afterPath="$PROJECT_DIR$/src/com/autocontext/actions/ToastAction.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/contexts/CalendarEventContext.java" afterPath="$PROJECT_DIR$/src/com/autocontext/contexts/CalendarEventContext.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/autocontext/observers/CalenderEventContextSensor.java" afterPath="$PROJECT_DIR$/src/com/autocontext/observers/CalenderEventContextSensor.java" />
     </list>
     <ignored path="autocontext.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -87,7 +81,20 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/com/autocontext/FlowManager.java" line="50" class="com.autocontext.FlowManager" package="com.autocontext">
+      <breakpoint url="file://$PROJECT_DIR$/src/com/autocontext/FlowManager.java" line="57" class="com.autocontext.FlowManager" package="com.autocontext">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="false" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+      <breakpoint url="file://$PROJECT_DIR$/src/com/autocontext/FlowManager.java" line="74" class="com.autocontext.FlowManager" package="com.autocontext">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -141,10 +148,81 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="FlowManager.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/autocontext/FlowManager.java">
+      <file leaf-file-name="DisableMicrophoneAction.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/autocontext/actions/DisableMicrophoneAction.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="129" column="30" selection-start="4058" selection-end="4058" vertical-scroll-proportion="-30.653847">
+            <state line="11" column="55" selection-start="352" selection-end="352" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BaseNotifyAction.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/autocontext/actions/BaseNotifyAction.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="57" column="141" selection-start="1776" selection-end="1776" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="e#545#568#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ToastAction.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/autocontext/actions/ToastAction.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="68" column="89" selection-start="1946" selection-end="1946" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="strings.xml" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/res/values/strings.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="27" column="23" selection-start="959" selection-end="959" vertical-scroll-proportion="0.83454543">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="toast_action_layout.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/res/layout/toast_action_layout.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="20" column="45" selection-start="766" selection-end="766" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CalendarEventContext.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/autocontext/contexts/CalendarEventContext.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="69" column="0" selection-start="1846" selection-end="2950" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Flow.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/autocontext/Flow.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="261" column="0" selection-start="9429" selection-end="9429" vertical-scroll-proportion="0.0">
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#8452#9145#0" expanded="true" />
+                <element signature="e#8822#9032#0" expanded="true" />
+                <element signature="e#9013#9014#0" expanded="true" />
+                <element signature="e#9134#9135#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="FlowManagerActivity.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/com/autocontext/FlowManagerActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="56" column="60" selection-start="1901" selection-end="1901" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -153,37 +231,7 @@
       <file leaf-file-name="FlowActivity.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/autocontext/FlowActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="35" column="25" selection-start="1050" selection-end="1050" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="FlowManagerActivity.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/com/autocontext/FlowManagerActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="57" column="0" selection-start="1885" selection-end="1885" vertical-scroll-proportion="0.58917195">
-              <folding>
-                <element signature="e#2528#2866#0" expanded="true" />
-                <element signature="e#2859#2860#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Handler.class" pinned="false" current="false" current-in-tab="false">
-        <entry file="jar://C:/Program Files/Android/android-sdk/platforms/android-15/android.jar!/android/os/Handler.class">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="17" column="16" selection-start="585" selection-end="585" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="flow_list.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/res/layout/flow_list.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="15" column="13" selection-start="386" selection-end="386" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -192,43 +240,7 @@
       <file leaf-file-name="CalenderEventContextSensor.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/autocontext/observers/CalenderEventContextSensor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="45" selection-start="986" selection-end="986" vertical-scroll-proportion="-8.5">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="BaseFlowActivity.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/autocontext/BaseFlowActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="38" column="46" selection-start="1148" selection-end="1148" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PactService.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/autocontext/PactService.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="35" column="8" selection-start="808" selection-end="832" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="pact_menu.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/res/menu/pact_menu.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="18" column="40" selection-start="724" selection-end="737" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="flow_actions.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/res/menu/flow_actions.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="2" column="0" selection-start="105" selection-end="289" vertical-scroll-proportion="0.0">
+            <state line="176" column="109" selection-start="5910" selection-end="5910" vertical-scroll-proportion="-15.192307">
               <folding />
             </state>
           </provider>
@@ -252,22 +264,22 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/com/autocontext/helpers/CalendarEventsDialog.java" />
-        <option value="$PROJECT_DIR$/res/layout/calendar_events_dialog.xml" />
-        <option value="$PROJECT_DIR$/src/com/autocontext/ContextSpec.java" />
-        <option value="$PROJECT_DIR$/src/com/autocontext/ContextSpecKind.java" />
-        <option value="$PROJECT_DIR$/src/com/autocontext/Reaction.java" />
+        <option value="$PROJECT_DIR$/res/layout/action_suppress_gps.xml" />
+        <option value="$PROJECT_DIR$/src/com/autocontext/actions/SuppressAccAction.java" />
         <option value="$PROJECT_DIR$/src/com/autocontext/actions/SuppressGPSAction.java" />
+        <option value="$PROJECT_DIR$/src/com/autocontext/actions/DisableGPSAction.java" />
         <option value="$PROJECT_DIR$/src/com/autocontext/ReactionKind.java" />
-        <option value="$PROJECT_DIR$/src/com/autocontext/actions/ToastAction.java" />
-        <option value="$PROJECT_DIR$/src/com/autocontext/contexts/CalendarEventContext.java" />
-        <option value="$PROJECT_DIR$/src/com/autocontext/Flow.java" />
-        <option value="$PROJECT_DIR$/res/menu/flow_actbar.xml" />
-        <option value="$PROJECT_DIR$/res/menu/pact_menu.xml" />
-        <option value="$PROJECT_DIR$/src/com/autocontext/PactService.java" />
-        <option value="$PROJECT_DIR$/src/com/autocontext/FlowManagerActivity.java" />
-        <option value="$PROJECT_DIR$/src/com/autocontext/observers/CalenderEventContextSensor.java" />
+        <option value="$PROJECT_DIR$/res/layout/action_item.xml" />
+        <option value="$PROJECT_DIR$/src/com/autocontext/actions/DisableMicrophoneAction.java" />
+        <option value="$PROJECT_DIR$/src/com/autocontext/actions/DisableAccelerometerAction.java" />
+        <option value="$PROJECT_DIR$/res/layout/flow_view.xml" />
         <option value="$PROJECT_DIR$/src/com/autocontext/FlowManager.java" />
+        <option value="$PROJECT_DIR$/src/com/autocontext/FlowManagerActivity.java" />
+        <option value="$PROJECT_DIR$/src/com/autocontext/actions/BaseNotifyAction.java" />
+        <option value="$PROJECT_DIR$/src/com/autocontext/Flow.java" />
+        <option value="$PROJECT_DIR$/res/layout/toast_action_layout.xml" />
+        <option value="$PROJECT_DIR$/src/com/autocontext/actions/ToastAction.java" />
+        <option value="$PROJECT_DIR$/res/values/strings.xml" />
       </list>
     </option>
   </component>
@@ -438,6 +450,10 @@
               <option name="myItemId" value="res" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="values" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -454,6 +470,38 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="menu" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="autocontext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="autocontext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="layout" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="autocontext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="autocontext" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -494,14 +542,16 @@
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="GoToClass.includeLibraries" value="false" />
-    <property name="options.splitter.details.proportions" value="0.2" />
     <property name="options.searchVisible" value="true" />
+    <property name="options.splitter.details.proportions" value="0.2" />
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.autocontext.actions" />
       <recent name="com.autocontext" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\k\Desktop\autocontext\res\layout" />
       <recent name="C:\Users\k\Desktop\autocontext\res\drawable-xhdpi" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -554,24 +604,6 @@
         <option name="Maven.BeforeRunTask" enabled="false" />
       </method>
     </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <method>
-        <option name="AntTarget" enabled="false" />
-        <option name="BuildArtifacts" enabled="false" />
-        <option name="Make" enabled="true" />
-        <option name="Maven.BeforeRunTask" enabled="false" />
-      </method>
-    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -597,6 +629,24 @@
       <envs />
       <properties />
       <listeners />
+      <method>
+        <option name="AntTarget" enabled="false" />
+        <option name="BuildArtifacts" enabled="false" />
+        <option name="Make" enabled="true" />
+        <option name="Maven.BeforeRunTask" enabled="false" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
       <method>
         <option name="AntTarget" enabled="false" />
         <option name="BuildArtifacts" enabled="false" />
@@ -749,24 +799,24 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="58" y="-4" width="1994" height="1160" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32936507" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3340217" sideWeight="0.59424603" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3340217" sideWeight="0.671627" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.40575397" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.40575397" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32936507" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32837301" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32837301" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32837301" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32936507" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21786268" sideWeight="0.671627" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21786268" sideWeight="0.59424603" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32936507" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -835,60 +885,30 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/autocontext/ReactionKind.java">
+    <entry file="jar://C:/Program Files/Android/android-sdk/platforms/android-15/android.jar!/android/view/View.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="19" selection-start="87" selection-end="87" vertical-scroll-proportion="0.0">
+        <state line="5" column="13" selection-start="137" selection-end="297" vertical-scroll-proportion="0.12164579">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/autocontext/actions/ToastAction.java">
+    <entry file="file://$PROJECT_DIR$/src/com/autocontext/actions/DisableGPSAction.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="27" selection-start="608" selection-end="608" vertical-scroll-proportion="0.0">
+        <state line="4" column="13" selection-start="74" selection-end="74" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/res/menu/calendar_event_filter_actbar.xml">
+    <entry file="file://$PROJECT_DIR$/src/com/autocontext/actions/DisableAccelerometerAction.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="4" column="24" selection-start="192" selection-end="224" vertical-scroll-proportion="0.0">
+        <state line="11" column="58" selection-start="356" selection-end="356" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/autocontext/contexts/CalendarEventContext.java">
+    <entry file="file://$PROJECT_DIR$/res/layout/flow_view.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="32" column="29" selection-start="959" selection-end="959" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/autocontext/Flow.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="101" column="0" selection-start="3688" selection-end="3775" vertical-scroll-proportion="-11.115385">
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/res/menu/flow_actbar.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="9" column="29" selection-start="436" selection-end="436" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/autocontext/BaseFlowActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="38" column="46" selection-start="1148" selection-end="1148" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/autocontext/PactService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="8" selection-start="808" selection-end="832" vertical-scroll-proportion="0.0">
+        <state line="75" column="50" selection-start="2838" selection-end="2838" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -900,55 +920,88 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/autocontext/observers/CalenderEventContextSensor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="45" selection-start="986" selection-end="986" vertical-scroll-proportion="-8.5">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/res/menu/flow_actions.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="2" column="0" selection-start="105" selection-end="289" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/res/menu/pact_menu.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="40" selection-start="724" selection-end="737" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/autocontext/FlowActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="25" selection-start="1050" selection-end="1050" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Android/android-sdk/platforms/android-15/android.jar!/android/os/Handler.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="17" column="16" selection-start="585" selection-end="585" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/autocontext/FlowManager.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="129" column="30" selection-start="4058" selection-end="4058" vertical-scroll-proportion="-30.653847">
+        <state line="38" column="29" selection-start="1109" selection-end="1109" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/autocontext/actions/DisableMicrophoneAction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="11" column="55" selection-start="352" selection-end="352" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/autocontext/FlowManagerActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="57" column="0" selection-start="1885" selection-end="1885" vertical-scroll-proportion="0.58917195">
+        <state line="56" column="60" selection-start="1901" selection-end="1901" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/autocontext/FlowActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="15" column="13" selection-start="386" selection-end="386" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/autocontext/actions/BaseNotifyAction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="57" column="141" selection-start="1776" selection-end="1776" vertical-scroll-proportion="0.0">
           <folding>
-            <element signature="e#2528#2866#0" expanded="true" />
-            <element signature="e#2859#2860#0" expanded="true" />
+            <element signature="e#545#568#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/autocontext/observers/CalenderEventContextSensor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="176" column="109" selection-start="5910" selection-end="5910" vertical-scroll-proportion="-15.192307">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/autocontext/contexts/CalendarEventContext.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="69" column="0" selection-start="1846" selection-end="2950" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/autocontext/Flow.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="261" column="0" selection-start="9429" selection-end="9429" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#8452#9145#0" expanded="true" />
+            <element signature="e#8822#9032#0" expanded="true" />
+            <element signature="e#9013#9014#0" expanded="true" />
+            <element signature="e#9134#9135#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/res/layout/toast_action_layout.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="20" column="45" selection-start="766" selection-end="766" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/autocontext/actions/ToastAction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="68" column="89" selection-start="1946" selection-end="1946" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/res/values/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="27" column="23" selection-start="959" selection-end="959" vertical-scroll-proportion="0.83454543">
+          <folding />
         </state>
       </provider>
     </entry>
