@@ -27,6 +27,7 @@ public class PactService extends Service {
 		super.onCreate();
 		flowManager = new FlowManager();
 		flowManager.registerContextObserver(new CalenderEventContextSensor());
+    // Register more sensors here.
 		flowManager.Initialize(getApplicationContext());
 	}
 

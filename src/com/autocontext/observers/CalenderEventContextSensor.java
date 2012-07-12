@@ -221,7 +221,7 @@ public class CalenderEventContextSensor extends ContextSensor {
                 contextEvent.context = searchContext;
                 contextEvent.event_id = id;
                 contextEvent.event_title = title;
-				triggers.add(contextEvent);
+        triggers.add(contextEvent);
 			}
 			
 			{
